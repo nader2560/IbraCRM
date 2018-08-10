@@ -14,3 +14,11 @@
         <span class="title">Users</span>
     </a>
 </li>
+<li class="nav-item">
+    <a class='sidebar-link' href="{{ route(ADMIN . '.products.index') }}">
+        <span class="icon-holder">
+            <i class="c-brown-500 ti-shopping-cart"></i>
+        </span>
+        <span class="title">Products</span>
+    </a>
+</li>

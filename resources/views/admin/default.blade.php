@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'IcingHouse CRM') }}</title>
 
     <!-- Styles -->
 	<link href="{{ mix('/css/app.css') }}" rel="stylesheet"> 
@@ -46,8 +46,8 @@
 
             <!-- ### $App Screen Footer ### -->
             <footer class="bdT ta-c p-30 lh-0 fsz-sm c-grey-600">
-                <span>Copyright © 2017 Designed by
-                    <a href="https://colorlib.com" target='_blank' title="Colorlib">Colorlib</a>. All rights reserved.</span>
+                <span>Copyright © Designed by
+                    <a href="http://edonec.com/" target='_blank' title="eDonec">eDonec</a>. All rights reserved.</span>
             </footer>
         </div>
     </div>

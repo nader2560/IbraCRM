@@ -25,6 +25,22 @@ return [
         'height' => 400,
     ],
 
+    'product_picture' => [
+        'public' => '/storage/product_image/',
+        'folder' => 'product_image',
+
+        'width'  => 400,
+        'height' => 400,
+    ],
+
+    'product_thumbnail' => [
+        'public' => '/storage/product_thumbnail/',
+        'folder' => 'product_thumbnail',
+
+        'width'  => 160,
+        'height' => 160,
+    ],
+
     /*
     |------------------------------------------------------------------------------------
     | ENV of APP

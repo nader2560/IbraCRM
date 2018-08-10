@@ -29,7 +29,7 @@
         </div>
 
         <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-            <label for="password" class="text-normal text-dark">password</label>
+            <label for="password" class="text-normal text-dark">Password</label>
             <input id="password" type="password" class="form-control" name="password" required>
 
             @if ($errors->has('password'))

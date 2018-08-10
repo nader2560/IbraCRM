@@ -14,7 +14,7 @@
         "babel-polyfill": "^6.26.0",
         "bootstrap": "^4.1.1",
         "bootstrap-datepicker": "^1.8.0",
-        "browser-sync": "^2.24.5",
+        "browser-sync": "^2.24.6",
         "browser-sync-webpack-plugin": "^1.2.0",
         "chart.js": "^2.7.2",
         "cross-env": "^5.2.0",
