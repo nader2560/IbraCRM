@@ -10,7 +10,7 @@
 			<img class="img-responsive" src="{{ $item->image_path }}" alt="Picture of the product {{ $item->title }}">
 		</div>
 		<div class="col-md-8">
-			<div class="text-center">
+			<div class="text-center mB-15">
 				<div><span class="font-weight-bold">{{$item->title}}</span> - {{$item->printable_price}}</div>
 			</div>
 			<div class="font-weight-light">
