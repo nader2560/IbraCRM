@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Product;
+use Corcel\Model\Post;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -16,7 +17,6 @@ class ProductController extends Controller
     public function index()
     {
         $items = Product::latest('updated_at')->get();
-
         return view('admin.products.index', compact('items'));
     }
 
@@ -40,7 +40,12 @@ class ProductController extends Controller
     {
         $this->validate($request, Product::rules());
 
-        Product::create($request->all());
+        $item = Product::create($request->all());
+
+        $wp_id = Product::createWordpressPost($request->all(), $item->id);
+
+        $item->wordpress_id = $wp_id;
+        $item->save();
 
         return back()->withSuccess(trans('app.success_store'));
     }
