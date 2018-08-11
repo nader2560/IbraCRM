@@ -9,6 +9,7 @@
         "barryvdh/laravel-debugbar": "^3.1",
         "fideloper/proxy": "^4.0",
         "intervention/image": "^2.4",
+        "jgrossi/corcel": "^2.6",
         "laravel/framework": "5.6.*",
         "laravel/tinker": "^1.0",
         "laravelcollective/html": "^5.6"
