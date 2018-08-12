@@ -42,10 +42,10 @@ class ProductController extends Controller
 
         $item = Product::create($request->all());
 
-        $wp_id = Product::createWordpressPost($request->all(), $item->id);
-
-        $item->wordpress_id = $wp_id;
-        $item->save();
+        //$wp_id = Product::createWordpressPost($request->all(), $item->id);
+        Product::createEbayPost($item->id);
+        //$item->wordpress_id = $wp_id;
+        //$item->save();
 
         return back()->withSuccess(trans('app.success_store'));
     }
