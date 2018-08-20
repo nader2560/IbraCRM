@@ -32,7 +32,7 @@ $request->RequesterCredentials->eBayAuthToken = $authToken;
 /**
  * By specifying 'Positive' we are telling the API return only positive reviews.
  */
-$request->CommentType = ['Positive'];
+//$request->CommentType = ['Positive'];
 /**
  * By specifying 'ReturnAll' we are telling the API return the full reviews.
  */
@@ -55,7 +55,7 @@ if (isset($response->Errors)) {
     }
 }
 //echo($response);
-if ($response->Ack !== 'Failure') {
+if ($response->Ack !== 'Failure' && $response->PaginationResult->TotalNumberOfEntries != 0) {
     foreach ($response->FeedbackDetailArray->FeedbackDetail as $feedback) {
         printf(
             "User %s bought %s on %s. Comment: %s<br/>",

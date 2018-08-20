@@ -197,7 +197,7 @@
             </div>
         </div>
         <div class="masonry-item col-md-6">
-            <!-- #Todo ==================== -->
+            <!-- Todo ==================== -->
             <div class="bd bgc-white p-20">
                 <div class="layers">
                     <div class="layer w-100 mB-10">
