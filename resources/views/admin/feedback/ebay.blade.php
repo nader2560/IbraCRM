@@ -56,9 +56,7 @@
                                         <td>
                                             {{--<span class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill">{{ substr($item->TimeLeft,1,strlen($item->TimeLeft)-1) }}</span>--}}
                                             <span class="badge bgc-green-50 c-green-700 p-10 lh-0 tt-c badge-pill">
-                                                {{ substr($item->TimeLeft,1,stripos($item->TimeLeft,'D')-1) }}D
-                                                {{ substr(stristr($item->TimeLeft,'T'),1,stripos(stristr($item->TimeLeft,'T'),'H')-1) }}H
-                                                {{ substr(stristr($item->TimeLeft,'H'),1,stripos(stristr($item->TimeLeft,'H'),'M')-1) }}M
+                                                {{ substr($item->TimeLeft,1,stripos($item->TimeLeft,'M')) }}
                                             </span>
                                         </td>
                                         <td>{{ $item->ListingDetails->StartTime->format('d M Y') }}</td>

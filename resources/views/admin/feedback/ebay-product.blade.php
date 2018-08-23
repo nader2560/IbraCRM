@@ -197,29 +197,50 @@
                         <div class="layer w-100">
                             <ul class="list-task list-group" data-role="tasklist">
                                 @foreach ($response2->FeedbackDetailArray->FeedbackDetail as $feedback)
-                                    {{--@if($feedback->Role === "Seller")--}}
-                                    <li class="list-group-item bdw-0" data-role="task">
-                                        <div class="peers ai-c">
-                                            <label class=" peers peer-greed js-sb ai-c">
-                                                <span class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
-                                                <span class="peer peer-greed">{{ $feedback->CommentText }}</span>
-                                                <span class="peer">
+                                    @if($feedback->Role === "Seller")
+                                        <li class="list-group-item bdw-0" data-role="task">
+                                            <div class="peers ai-c">
+                                                <label class=" peers peer-greed js-sb ai-c">
+                                                    <span class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
+                                                    <span class="peer peer-greed">{{ $feedback->CommentText }}</span>
+                                                    <span class="peer">
                                                 {{ $feedback->CommentTime->format('d M Y') }}
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                                    @if($feedback->CommentType === "Positive")
-                                                        <span class="badge badge-pill fl-r badge-success lh-0 p-10">Positive</span>
-                                                    @elseif($feedback->CommentType === "Negative")
-                                                        <span class="badge badge-pill fl-r badge-danger lh-0 p-10">Negative</span>
-                                                    @elseif($feedback->CommentType === "Neutral")
-                                                        <span class="badge badge-pill fl-r badge-info lh-0 p-10">Neutral</span>
-                                                    @else
-                                                        <span class="badge badge-pill fl-r badge-light lh-0 p-10">Withdrawn</span>
-                                                    @endif
-                                            </span>
-                                            </label>
-                                        </div>
-                                    </li>
-                                    {{--@endif--}}
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                        @if($feedback->CommentType === "Positive")
+                                                            <span class="badge badge-pill fl-r badge-success lh-0 p-10">Positive</span>
+                                                        @elseif($feedback->CommentType === "Negative")
+                                                            <span class="badge badge-pill fl-r badge-danger lh-0 p-10">Negative</span>
+                                                        @elseif($feedback->CommentType === "Neutral")
+                                                            <span class="badge badge-pill fl-r badge-info lh-0 p-10">Neutral</span>
+                                                        @else
+                                                            <span class="badge badge-pill fl-r badge-light lh-0 p-10">Withdrawn</span>
+                                                        @endif
+                                                </span>
+                                                </label>
+                                                &nbsp;&nbsp;
+                                                @if($feedback->FeedbackResponse === null)
+                                                    <button type="button" id="fbBtn{{ $feedback->FeedbackID }}"
+                                                            class="btn btn-primary bdrs-50p w-2r p-0 h-2r  r-1 t-1">
+                                                        <i class="fa fa-paper-plane-o"></i>
+                                                    </button>
+                                                    <br>
+                                                    <input type="text" class="form-control bdrs-10em m-0"
+                                                           id="fbTxt{{ $feedback->FeedbackID }}"
+                                                           placeholder="Say something...">
+                                                @else
+                                                    <button disabled="true" type="button" id="fbBtnInactive"
+                                                            class="btn btn-primary bdrs-50p w-2r p-0 h-2r  r-1 t-1">
+                                                        <i class="fa fa-paper-plane-o"></i>
+                                                    </button>
+                                                    <br>
+                                                    <input disabled="true" type="text"
+                                                           class="form-control bdrs-10em m-0"
+                                                           id="fbTxtInactive"
+                                                           placeholder="{{ $feedback->FeedbackResponse }}">
+                                                @endif
+                                            </div>
+                                        </li>
+                                    @endif
                                 @endforeach
                             </ul>
                         </div>
@@ -299,4 +320,44 @@
             evt.currentTarget.className += " active";
         }
     </script>
+    @if ($response2->PaginationResult->TotalNumberOfEntries <> 0)
+        @foreach ($response2->FeedbackDetailArray->FeedbackDetail as $feedback)
+            @if($feedback->Role === "Seller" && $feedback->FeedbackResponse === null)
+                <script>
+                    document.getElementById("fbBtn{{ $feedback->FeedbackID }}").onclick = function () {
+                        if (document.getElementById("fbTxt{{ $feedback->FeedbackID }}").value != "") {
+                            document.getElementById("fbTxt{{ $feedback->FeedbackID }}").disabled = true;
+                            document.getElementById("fbBtn{{ $feedback->FeedbackID }}").disabled = true;
+
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-XSRF-TOKEN': decodeURIComponent(/XSRF-Token=([^;]*)/ig.exec(document.cookie)[1])
+                                }
+                            });
+
+                            $.ajax({
+                                type: "POST",
+                                url: '../fbmsg',
+                                data: {
+                                    'body': document.getElementById("fbTxt{{ $feedback->FeedbackID }}").value,
+                                    'msgId': "{{ $feedback->FeedbackID }}",
+                                    'recId': "{{ $feedback->CommentingUser }}"
+                                },
+                                dataType: 'json',
+                                success: function (response) {
+                                    console.log("Response:");
+                                    console.log(response);
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    console.log("ERROR:");
+                                    console.log(JSON.stringify(jqXHR));
+                                    console.log("AJAX error: " + textStatus + ' : ' + errorThrown);
+                                }
+                            });
+                        }
+                    }
+                </script>
+            @endif
+        @endforeach
+    @endif
 @endsection

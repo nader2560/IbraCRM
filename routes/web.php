@@ -20,6 +20,7 @@ Route::prefix('feedback')->group(function(){
     Route::get('eby','EbayController@index')->name('ebay');
     Route::get('eby/product/{id}','EbayController@product');
     Route::post('eby/msg','EbayController@answer')->name('respondebay');
+    Route::post('eby/fbmsg','EbayController@answerfb')->name('respondfbebay');
     Route::get('amz','AmazonController@index')->name('amazon');
     Route::get('fbm','FacebookController@index')->name('facebook');
     Route::get('gmt','GumtreeController@index')->name('gumtree');

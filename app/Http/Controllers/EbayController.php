@@ -176,6 +176,37 @@ class EbayController extends Controller
         return new Response($response, 200);
     }
 
+    public function answerfb(Request $request)
+    {
+        /**
+         * Create the service object.
+         */
+        $ebay_service = new EbayServices();
+        $service = $ebay_service->createTrading();
+
+        $request1 = new Types\RespondToFeedbackRequestType();
+
+        /**
+         * A user token is required when using the Trading service.
+         */
+        $ebay = new Ebay();
+        $authToken = $ebay->getAuthToken();
+        $request1->RequesterCredentials = new Types\CustomSecurityHeaderType();
+        $request1->RequesterCredentials->eBayAuthToken = $authToken;
+
+        /*
+         * Filling the request fields.
+         */
+        $request1->FeedbackID = $request->input('msgId');
+        $request1->TargetUserID = $request->input('recId');
+        $request1->ResponseType = "Reply";
+        $request1->ResponseText = $request->input('body');
+
+        $response = $service->RespondToFeedback($request1);
+
+        return new Response($response, 200);
+    }
+
 //    public function countMsgs($id)
 //    {
 //
