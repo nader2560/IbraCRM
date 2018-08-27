@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "64e3939b4aee32470c1a2b387ecf9ae5",
+    "content-hash": "067ea0e6ee5ce96f3bdb5de64d383f97",
     "packages": [
         {
             "name": "barryvdh/laravel-debugbar",
@@ -2017,6 +2017,54 @@
                 "uuid"
             ],
             "time": "2018-01-20T00:28:24+00:00"
+        },
+        {
+            "name": "sonnenglas/laravel5-amazon-mws",
+            "version": "3.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sonnenglas/amazon-mws-laravel.git",
+                "reference": "2fca783a9fa65c718da013b9130321c32aa414f2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sonnenglas/amazon-mws-laravel/zipball/2fca783a9fa65c718da013b9130321c32aa414f2",
+                "reference": "2fca783a9fa65c718da013b9130321c32aa414f2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "illuminate/support": "5.*",
+                "php": ">=5.5.9"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "5.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Sonnenglas\\AmazonMws\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Przemek Peron",
+                    "email": "przemek@redkorn.pl"
+                }
+            ],
+            "description": "Use Amazon's MWS web services with Laravel 5.x. Based on creacoon/amazon-mws-laravel package and modified to make it compatible with latest Laravel releases (+ bugfixes).",
+            "keywords": [
+                "amazon",
+                "api",
+                "laravel",
+                "mws",
+                "php"
+            ],
+            "time": "2018-07-25T10:46:04+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",

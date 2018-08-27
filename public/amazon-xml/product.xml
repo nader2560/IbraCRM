@@ -1,0 +1,37 @@
+<?xml version="1.0" ?> 
+	<AmazonEnvelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="amzn-envelope.xsd">
+		<Header>
+			<DocumentVersion>1.01</DocumentVersion> 
+			<MerchantIdentifier>M_SELLER_354577</MerchantIdentifier> 
+		</Header>
+		<MessageType>Product</MessageType> 
+		<PurgeAndReplace>true</PurgeAndReplace> 
+		<Message>
+			<MessageID>1</MessageID> 
+			<OperationType>Update</OperationType> 
+			<Product>
+				<SKU></SKU> 
+				<LaunchDate></LaunchDate> 
+				<DescriptionData>
+					<Title></Title> 
+					<Brand>IA Cakes</Brand>
+					<Description></Description> 
+					<Manufacturer>IA Cakes</Manufacturer> 
+					<SearchTerms>cake boards</SearchTerms> 
+					<SearchTerms>cake sponges</SearchTerms> 
+					<SearchTerms>cake mixtures</SearchTerms> 
+					<SearchTerms>cake decoration</SearchTerms> 
+					<SearchTerms>cake ingredients</SearchTerms> 
+					<IsGiftWrapAvailable>false</IsGiftWrapAvailable> 
+					<IsGiftMessageAvailable>false</IsGiftMessageAvailable>
+					<RecommendedBrowseNode>340834031</RecommendedBrowseNode>
+					<RecommendedBrowseNode>358587031</RecommendedBrowseNode>
+				</DescriptionData>
+				<ProductData>
+					<Kitchen>
+						<ProductType>Kitchen</ProductType>
+					</Kitchen>
+				</ProductData>
+			</Product>
+		</Message>
+	</AmazonEnvelope>

@@ -29,6 +29,7 @@ use Hkonnet\LaravelEbay\Facade\Ebay;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Image;
+use Sonnenglas\AmazonMws\AmazonFeed;
 
 class Product extends Model
 {
@@ -64,7 +65,48 @@ class Product extends Model
     |------------------------------------------------------------------------------------
     */
 
+    public static function createAmazonPost($product_id) {
+        $product = Product::findOrFail($product_id);
+
+        // Product Feed
+        $productFeedXml = simplexml_load_file(public_path("amazon-xml/product.xml"));
+        $productFeedXml->Message->Product->SKU = $product->sku;
+        $productFeedXml->Message->Product->LaunchDate = $product->created_at->toDateTimeString();
+        $productFeedXml->Message->Product->DescriptionData->Title = $product->title;
+        $productFeedXml->Message->Product->DescriptionData->Description = $product->description;
+        // Inventory Feed
+        $inventoryFeedXml = simplexml_load_file(public_path("amazon-xml/inventory.xml"));
+        $inventoryFeedXml->Message->Inventory->SKU = $product->sku;
+        // Price Feed
+        $priceFeedXml = simplexml_load_file(public_path("amazon-xml/price.xml"));
+        $priceFeedXml->Message->Price->SKU = $product->sku;
+        $priceFeedXml->Message->Price->StandardPrice = $product->price;
+        // Image Feed
+        $imageFeedXml = simplexml_load_file(public_path("amazon-xml/image.xml"));
+        $imageFeedXml->Message->ProductImage->SKU = $product->sku;
+        $imageFeedXml->Message->ProductImage->ImageLocation = $product->image_path;
+
+
+        // Getting the response for each one of the feeds
+        $product_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_DATA_", $productFeedXml);
+        $inventory_response = Product::submitAmazonFeed("store1", "_POST_INVENTORY_AVAILABILITY_DATA_", $inventoryFeedXml);
+        $price_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_PRICING_DATA_", $priceFeedXml);
+        $image_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_IMAGE_DATA_", $imageFeedXml);
+
+        dd($product_response);
+    }
+
+    private static function submitAmazonFeed ($store, $feed_type, $xml){
+        $amazon_feed = new AmazonFeed($store);
+        $amazon_feed->setFeedType($feed_type);
+        $amazon_feed->setFeedContent($xml->asXML());
+        $amazon_feed->submitFeed();
+
+        return $amazon_feed->getResponse();
+    }
+
     /**
+     * todo review the post because its shit (pass only product id as it is a static func)
      * @param $request : contains the inputs' values (array)
      * @param $post_id : the product's id (used to make the post GUID)
      * @return mixed : id of the wp post
@@ -393,6 +435,17 @@ class Product extends Model
 
     public function getPrintablePriceAttribute(){
         return $this->price;
+    }
+
+    public function getSkuAttribute(){
+        $words = explode(" ", $this->title);
+        $acronym = "";
+
+        foreach ($words as $w) {
+            $acronym .= $w[0];
+        }
+
+        return $acronym . '-' . $this->id;
     }
 
     public function getImagePathAttribute($value)
