@@ -11,7 +11,7 @@
     <title>{{ config('app.name', 'IcingHouse CRM') }}</title>
 
     <!-- Styles -->
-	<link href="{{ mix('/css/app.css') }}" rel="stylesheet"> 
+	<link href="{{ mix('/css/app.css') }}" rel="stylesheet">
 	
 	@yield('css')
 
@@ -37,7 +37,7 @@
 
                         <h4 class="c-grey-900 mT-10 mB-30">@yield('page-header')</h4>
 
-						@include('admin.partials.messages') 
+						@include('admin.partials.messages')
 						@yield('content')
 
                     </div>
