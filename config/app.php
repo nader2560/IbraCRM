@@ -151,6 +151,7 @@ return [
          * Package Service Providers...
          */
         Corcel\Laravel\CorcelServiceProvider::class,
+        Hkonnet\LaravelEbay\EbayServiceProvider::class,
 
         /*
          * Application Service Providers...

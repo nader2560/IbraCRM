@@ -42,8 +42,8 @@ class ProductController extends Controller
 
         $item = Product::create($request->all());
 
-        $wp_id = Product::createWordpressPost($request->all(), $item->id);
-
+        $wp_id = Product::createWordpressPost($item->id);
+        //Product::createEbayPost($item->id); todo : final tests and have the ebay id
         $item->wordpress_id = $wp_id;
         $item->save();
 
