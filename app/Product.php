@@ -106,7 +106,6 @@ class Product extends Model
     }
 
     /**
-     * todo review the post because its shit (pass only product id as it is a static func)
      * @param $request : contains the inputs' values (array)
      * @param $post_id : the product's id (used to make the post GUID)
      * @return mixed : id of the wp post
