@@ -45,7 +45,8 @@ class ProductController extends Controller
         $wp_id = Product::createWordpressPost($request->all(), $item->id);
         $item->wordpress_id = $wp_id;
 
-        Product::createEbayPost($item->id);
+        $ebay_id = Product::createEbayPost($item->id);
+        $item->ebay_id = $ebay_id;
 
         $amazon_id = Product::createAmazonPost($item->id);
         $item->amazon_id = implode(";", $amazon_id);
