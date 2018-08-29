@@ -228,7 +228,7 @@ class Product extends Model
          */
         $item->Title = $product->title;
         $item->Description = $product->description;
-        $item->SKU = 'ABC-001'; // todo
+        $item->SKU = $product->sku;
         $item->Country = env("EBAY_COUNTRY_CODE");
         $item->Location = env("EBAY_LOCATION");
         $item->PostalCode = env("EBAY_POSTAL_CODE");
@@ -262,7 +262,6 @@ class Product extends Model
          * This is because a seller may have more than one PayPal account.
          */
         $item->PaymentMethods = [
-            'VisaMC',
             'PayPal'
         ];
         $item->PayPalEmailAddress = env("EBAY_PAYPAL_ADDRESS");
@@ -365,6 +364,7 @@ class Product extends Model
                 }
             }
         }
+        dd($response);
         if ($response->Ack !== 'Failure') {
             dd($response);
             /*printf(
@@ -406,19 +406,7 @@ class Product extends Model
 
         // Send the request
         $response = $service->createOrReplaceInventoryItem($request);
-        if (isset($response->errors)) {
-            foreach ($response->errors as $error) {
-                Log::error(
-                    "%s: %s\n%s\n\n",
-                    $error->errorId,
-                    $error->message,
-                    $error->longMessage
-                );
-            }
-        }
-        if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 400) {
-            dd($response);
-        }
+        return $response->ItemID;
     }
 
 
