@@ -152,6 +152,7 @@ return [
          */
         Corcel\Laravel\CorcelServiceProvider::class,
         Hkonnet\LaravelEbay\EbayServiceProvider::class,
+        Sonnenglas\AmazonMws\ServiceProvider::class,
 
         /*
          * Application Service Providers...

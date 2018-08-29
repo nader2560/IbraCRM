@@ -29,9 +29,12 @@ use Hkonnet\LaravelEbay\Facade\Ebay;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Image;
+use Sonnenglas\AmazonMws\AmazonFeed;
+use Sonnenglas\AmazonMws\AmazonFeedResult;
 
 class Product extends Model
 {
+    const standard_product_id_types = [0 => "UPC", 1 => "EAN", 2 => "ISBN"];
 
     /**
      * The attributes that are mass assignable.
@@ -39,7 +42,7 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'description', 'price', 'image_path', 'thumbnail_path'
+        'title', 'description', 'standard_product_id_type', 'standard_product_id_code', 'price', 'image_path', 'thumbnail_path'
     ];
 
     /*
@@ -52,7 +55,7 @@ class Product extends Model
         $commun = [
             'title'    => "required",
             'price'    => "required|numeric|max:99999",
-            'image_path'  => "required|image",
+            'image_path'  => "required|image"
         ];
 
         return $commun;
@@ -63,6 +66,54 @@ class Product extends Model
     | API Integrations
     |------------------------------------------------------------------------------------
     */
+
+    public static function createAmazonPost($product_id) {
+        $product = Product::findOrFail($product_id);
+
+        // Product Feed
+        $productFeedXml = simplexml_load_file(public_path("amazon-xml/product.xml"));
+        $productFeedXml->Message->Product->SKU = $product->sku;
+        $productFeedXml->Message->Product->StandardProductID->Type = Product::standard_product_id_types[$product->standard_product_id_type];
+        $productFeedXml->Message->Product->StandardProductID->Value = $product->standard_product_id_code;
+        $productFeedXml->Message->Product->LaunchDate = $product->created_at->addDay()->toIso8601ZuluString();
+        $productFeedXml->Message->Product->DescriptionData->Title = $product->title;
+        $productFeedXml->Message->Product->DescriptionData->Description = $product->description;
+        // Inventory Feed
+        $inventoryFeedXml = simplexml_load_file(public_path("amazon-xml/inventory.xml"));
+        $inventoryFeedXml->Message->Inventory->SKU = $product->sku;
+        // Price Feed
+        $priceFeedXml = simplexml_load_file(public_path("amazon-xml/price.xml"));
+        $priceFeedXml->Message->Price->SKU = $product->sku;
+        $priceFeedXml->Message->Price->StandardPrice = $product->price;
+        // Image Feed
+        $imageFeedXml = simplexml_load_file(public_path("amazon-xml/image.xml"));
+        $imageFeedXml->Message->ProductImage->SKU = $product->sku;
+        $imageFeedXml->Message->ProductImage->ImageLocation = $product->image_path;
+
+
+        // Getting the response for each one of the feeds
+        $product_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_DATA_", $productFeedXml);
+        $inventory_response = Product::submitAmazonFeed("store1", "_POST_INVENTORY_AVAILABILITY_DATA_", $inventoryFeedXml);
+        $price_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_PRICING_DATA_", $priceFeedXml);
+        $image_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_IMAGE_DATA_", $imageFeedXml);
+
+        //dd($product_response);
+        return [
+            $product_response['FeedSubmissionId'],
+            $inventory_response['FeedSubmissionId'],
+            $price_response['FeedSubmissionId'],
+            $image_response['FeedSubmissionId']
+        ];
+    }
+
+    private static function submitAmazonFeed ($store, $feed_type, $xml){
+        $amazon_feed = new AmazonFeed($store);
+        $amazon_feed->setFeedType($feed_type);
+        $amazon_feed->setFeedContent($xml->asXML());
+        $amazon_feed->submitFeed();
+
+        return $amazon_feed->getResponse();
+    }
 
     /**
      * @param $request : contains the inputs' values (array)
@@ -398,6 +449,17 @@ class Product extends Model
         return $this->price;
     }
 
+    public function getSkuAttribute(){
+        $words = explode(" ", $this->title);
+        $acronym = "";
+
+        foreach ($words as $w) {
+            $acronym .= $w[0];
+        }
+
+        return $acronym . '-' . $this->id;
+    }
+
     public function getImagePathAttribute($value)
     {
         if (!$value) {
@@ -423,5 +485,18 @@ class Product extends Model
     public function setThumbnailPathAttribute($photo)
     {
         $this->attributes['thumbnail_path'] = move_file($photo, 'product_thumbnail');
+    }
+
+    public function getAmazonFeedStatusAttribute(){
+        $amazon_feed_ids = explode(";", $this->amazon_id);
+        //dd($amazon_feed_ids);
+        $list_raw_feeds = [];
+        foreach($amazon_feed_ids as $feed_id){
+            $amz = new AmazonFeedResult("store1", $feed_id); //feed ID can be quickly set by passing it to the constructor
+            //$amz->setFeedId($feed_id); //otherwise, it must be set this way
+            $amz->fetchFeedResult();
+            $list_raw_feeds += [$amz->getRawFeed()];
+        }
+        return $list_raw_feeds;
     }
 }

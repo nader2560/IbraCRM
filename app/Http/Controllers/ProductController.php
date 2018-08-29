@@ -42,11 +42,15 @@ class ProductController extends Controller
 
         $item = Product::create($request->all());
 
-        $wp_id = Product::createWordpressPost($item->id);
-        //Product::createEbayPost($item->id); todo : final tests and have the ebay id
+        $wp_id = Product::createWordpressPost($request->all(), $item->id);
         $item->wordpress_id = $wp_id;
-        $item->save();
 
+        Product::createEbayPost($item->id);
+
+        $amazon_id = Product::createAmazonPost($item->id);
+        $item->amazon_id = implode(";", $amazon_id);
+
+        $item->save();
         return back()->withSuccess(trans('app.success_store'));
     }
 
@@ -59,7 +63,12 @@ class ProductController extends Controller
     public function show($id)
     {
         $item = Product::findOrFail($id);
-
+        $list_feeds = [];
+        foreach($item->amazon_feed_status as $amz_feed){
+            $xml = simplexml_load_string($amz_feed);
+            $list_feeds += [$xml];
+        }
+        $item->amazon_feeds = $list_feeds;
         return view('admin.products.view', compact('item'));
     }
 

@@ -16,7 +16,19 @@
 			<div class="font-weight-light">
 				<span class="font-weight-bold">Description : </span> {{$item->description ? $item->description : "No description provided.."}}
 			</div>
-			{{-- Insert item specific charts etc.. --}}
+			<div class="font-weight-light">
+				<span class="font-weight-bold">Amazon Response : <br/></span>
+				@forelse($item->amazon_feeds as $amazon_feed)
+					@forelse($amazon_feed->Message->ProcessingReport->Result as $result)
+						<strong>{{ $result->ResultCode }}</strong> : {{ $result->ResultDescription }} <br/>
+					@empty
+						No messages to show..
+					@endforelse
+					<hr/>
+				@empty
+					No feeds posted on Amazon..
+				@endforelse
+			</div>
 		</div>
 	</div>
 @stop
