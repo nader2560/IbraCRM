@@ -1,63 +1,43 @@
 <?php
-//FEEDBACK
-/**
- * The namespaces provided by the SDK.
- */
-use \DTS\eBaySDK\Constants;
-use \DTS\eBaySDK\Trading\Services;
-use \DTS\eBaySDK\Trading\Types;
-use \DTS\eBaySDK\Trading\Enums;
-use \Hkonnet\LaravelEbay\EbayServices;
-use Hkonnet\LaravelEbay\Ebay;
-/**
- * Create the service object.
- */
-$ebay_service = new EbayServices();
-$service = $ebay_service->createTrading();
 
-/**
- * Create the request object.
- */
-$request = new Types\GetSellerDashboardRequestType();
-/**
- * An user token is required when using the Trading service.
- *
- * NOTE: eBay will use the token to determine which store to return.
- */
-$request->RequesterCredentials = new Types\CustomSecurityHeaderType();
-$ebay = new Ebay();
-$authToken = $ebay->getAuthToken();
-//echo $authToken;
-$request->RequesterCredentials->eBayAuthToken = $authToken;
-/**
- * Send the request.
- */
-$response = $service->getSellerDashboard($request);
-/**
- * Output the result of calling the service operation.
- */
-if (isset($response->Errors)) {
-    foreach ($response->Errors as $error) {
-        printf(
-            "%s: %s\n%s\n\n",
-            $error->SeverityCode === Enums\SeverityCodeType::C_ERROR ? 'Error' : 'Warning',
-            $error->ShortMessage,
-            $error->LongMessage
-        );
-    }
-}
-//echo($response);
-if ($response->Ack !== 'Failure') {
-//    foreach ($response->FeedbackDetailArray->FeedbackDetail as $feedback) {
-//        printf(
-////            "User %s bought %s on %s. Comment: %s<br/>",
-////            $feedback->CommentingUser,
-////            $feedback->ItemTitle,
-////            $feedback->CommentTime->format('d-m-Y H:i'),
-////            $feedback->CommentText
-//            "sewev: %s<br>",
-//            $feedback->FeedbackResponse
-//        );
-//    }
-    echo $response->Performance[1]->Status;
-}
+//use Sonnenglas\AmazonMws\AmazonOrderList;
+//
+//function getAmazonOrders() {
+//    $amz = new AmazonOrderList("store1"); //store name matches the array key in the config file
+//    $amz->setLimits('Modified', "- 24 hours");
+//    $amz->setFulfillmentChannelFilter("MFN"); //no Amazon-fulfilled orders
+//    $amz->setOrderStatusFilter(
+//        array("Unshipped", "PartiallyShipped", "Canceled", "Unfulfillable")
+//    ); //no shipped or pending
+//    $amz->setUseToken(); //Amazon sends orders 100 at a time, but we want them all
+//    $amz->fetchOrders();
+//    return $amz->getList();
+//}
+//
+//$amz1 = new \Sonnenglas\AmazonMws\AmazonReportRequest('store1');
+//$amz1->setReportType('_GET_MERCHANT_LISTINGS_ALL_DATA_');
+////$amz1->setReportType('_GET_SELLER_FEEDBACK_DATA_');
+//$amz1->requestReport();
+//echo($amz1->getReportRequestId());
+
+$amz = new \Sonnenglas\AmazonMws\AmazonReportRequestList('store1');
+$amz->setMaxCount(1);
+$amz->fetchRequestList();
+//dd($amz->getList());
+
+//foreach ($amz->getList() as $rep) {
+//    echo $rep['StartDate'].'<br>';
+//}
+
+//foreach ($amz->getList() as $rep) {
+//    $amzz = new \Sonnenglas\AmazonMws\AmazonReport('store1');
+//    $amzz->setReportId($rep['GeneratedReportId']);
+//    $amzz->fetchReport();
+//    echo count($amzz->getRawResponses());
+//}
+//
+$amzz = new \Sonnenglas\AmazonMws\AmazonReport('store1');
+$amzz->setReportId($amz->getList()[0]['GeneratedReportId']);
+$amzz->fetchReport();
+dd($amzz->saveReport('/home/rkayx/Documents/eDonec/IcingHouseCRM/trials/test'));
+//echo file_get_contents('/home/rkayx/Documents/test');
