@@ -364,48 +364,6 @@ class Product extends Model
                 }
             }
         }
-        dd($response);
-        if ($response->Ack !== 'Failure') {
-            dd($response);
-            /*printf(
-                "The item was listed to the eBay Sandbox with the Item number %s\n",
-                $response->ItemID
-            );*/
-        }
-        dd("The End");
-
-        // *********************** OLD CODE ***********************
-        // Create the request object.
-        $request = new CreateOrReplaceInventoryItemRestRequest();
-
-        // $request->sku = '123'; // SKU goes for (Stock-Keeping Unit)
-
-        $request->availability = new Availability();
-        $request->availability->shipToLocationAvailability = new ShipToLocationAvailability();
-        $request->availability->shipToLocationAvailability->quantity = 50; // todo have a default quantity as env variable ?
-
-        $request->condition = ConditionEnum::C_NEW_OTHER;
-
-        $request->product = new \DTS\eBaySDK\Inventory\Types\Product(); // Ebay's product
-        $request->product->title = $product->title;
-        $request->product->description = $product->description;
-        /*
-         * $request->product->aspects = [
-                'Brand'                => ['GoPro'],
-                'Type'                 => ['Helmet/Action'],
-                'Storage Type'         => ['Removable'],
-                'Recording Definition' => ['High Definition'],
-                'Media Format'         => ['Flash Drive (SSD)'],
-                'Optical Zoom'         => ['10x', '8x', '4x']
-            ];
-            Aspects are specified as an associative array.
-         */
-        $request->product->imageUrls = [
-            $product->image_path
-        ];
-
-        // Send the request
-        $response = $service->createOrReplaceInventoryItem($request);
         return $response->ItemID;
     }
 
