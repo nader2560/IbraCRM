@@ -94,7 +94,7 @@
         @else
             <div align="center">
                 <div class="masonry-item">
-                @foreach($response->MemberMessage->MemberMessageExchange as $discussion)
+                @foreach($msgs as $discussion)
                     <!-- #Chat ==================== -->
                         <div class="bd bgc-white">
                             <div class="layers">
@@ -110,12 +110,21 @@
                                             <div class="peer peer-greed">
                                                 <div class="layers ai-fs gapY-5">
                                                     <div class="layer">
-                                                        <div class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
+                                                        <div
+                                                            class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
                                                             <div class="peer mR-10">
                                                                 <small>{{ $discussion->CreationDate->format('H:i') }}</small>
                                                             </div>
                                                             <div class="peer-greed">
-                                                                <span>{{ $discussion->Question->Body }}</span>
+                                                                <span>{{ $discussion->Question->Body }}
+                                                                    @if (isset($discussion->MessageMedia))
+                                                                        <br><br>
+                                                                        @foreach($discussion->MessageMedia as $media)
+                                                                            <img src="{{ $media->MediaURL }}" alt="{{ $media->MediaName }}">
+                                                                            <br>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -128,12 +137,15 @@
                                                 <div class="peer peer-greed ord-0">
                                                     <div class="layers ai-fe gapY-10">
                                                         <div class="layer">
-                                                            <div class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
+                                                            <div
+                                                                class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
                                                                 <div class="peer mL-10 ord-1">
-                                                                    <small id="msgTime{{ $discussion->Question->MessageID }}"></small>
+                                                                    <small
+                                                                        id="msgTime{{ $discussion->Question->MessageID }}"></small>
                                                                 </div>
                                                                 <div class="peer-greed ord-0">
-                                                                    <span id="msgBody{{ $discussion->Question->MessageID }}"></span>
+                                                                    <span
+                                                                        id="msgBody{{ $discussion->Question->MessageID }}"></span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -201,7 +213,8 @@
                                         <li class="list-group-item bdw-0" data-role="task">
                                             <div class="peers ai-c">
                                                 <label class=" peers peer-greed js-sb ai-c">
-                                                    <span class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
+                                                    <span
+                                                        class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
                                                     <span class="peer peer-greed">{{ $feedback->CommentText }}</span>
                                                     <span class="peer">
                                                 {{ $feedback->CommentTime->format('d M Y') }}
@@ -255,7 +268,7 @@
 
 @section('js')
     @if($response->PaginationResult->TotalNumberOfEntries <> 0)
-        @foreach($response->MemberMessage->MemberMessageExchange as $discussion)
+        @foreach($msgs as $discussion)
             @if($discussion->MessageStatus <> "Answered")
                 <script>
                     document.getElementById("msgBtn{{ $discussion->Question->MessageID }}").onclick = function () {
