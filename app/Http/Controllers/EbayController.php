@@ -105,6 +105,7 @@ class EbayController extends Controller
         $request = new Types\GetMemberMessagesRequestType();
         $request2 = new Types\GetFeedbackRequestType();
         $request3 = new \DTS\eBaySDK\Shopping\Types\GetSingleItemRequestType();
+        $request4 = new Types\GetItemTransactionsRequestType();
 
         /**
          * A user token is required when using the Trading service.
@@ -115,6 +116,8 @@ class EbayController extends Controller
         $request->RequesterCredentials->eBayAuthToken = $authToken;
         $request2->RequesterCredentials = new Types\CustomSecurityHeaderType();
         $request2->RequesterCredentials->eBayAuthToken = $authToken;
+        $request4->RequesterCredentials = new Types\CustomSecurityHeaderType();
+        $request4->RequesterCredentials->eBayAuthToken = $authToken;
 
         /*
          * Filling the request fields.
@@ -125,10 +128,14 @@ class EbayController extends Controller
         $request2->DetailLevel = ['ReturnAll'];
         $request2->ItemID = $id;
         $request3->ItemID = $id;
+        $request4->ItemID = $id;
 
         $response = $service->GetMemberMessages($request);
         $response2 = $service->GetFeedback($request2);
         $response3 = $service2->GetSingleItem($request3);
+        //$response4 = $service->GetItemTransactions($request4);
+
+        //dd($response4);
 
         //dd(count($response->MemberMessage->MemberMessageExchange));
 

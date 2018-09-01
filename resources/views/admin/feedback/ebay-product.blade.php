@@ -80,6 +80,7 @@
             @endif
         </button>
         <button class="tablinks" onclick="openCity(event, 'Paris')">Feedback & Comments</button>
+        <button class="tablinks" onclick="openCity(event, 'Tunis')">Orders & Transactions</button>
     </div>
     <div id="London" class="tabcontent">
         <!-- Messages Content -->
@@ -263,6 +264,8 @@
             <br><br>
     @endif
     <!-- EndContent -->
+    </div>
+    <div id="Tunis" class="tabcontent">
     </div>
 @endsection
 
