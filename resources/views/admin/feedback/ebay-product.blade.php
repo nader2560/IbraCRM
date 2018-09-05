@@ -112,7 +112,7 @@
                                                 <div class="layers ai-fs gapY-5">
                                                     <div class="layer">
                                                         <div
-                                                            class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
+                                                                class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
                                                             <div class="peer mR-10">
                                                                 <small>{{ $discussion->CreationDate->format('H:i') }}</small>
                                                             </div>
@@ -121,7 +121,8 @@
                                                                     @if (isset($discussion->MessageMedia))
                                                                         <br><br>
                                                                         @foreach($discussion->MessageMedia as $media)
-                                                                            <img src="{{ $media->MediaURL }}" alt="{{ $media->MediaName }}">
+                                                                            <img src="{{ $media->MediaURL }}"
+                                                                                 alt="{{ $media->MediaName }}">
                                                                             <br>
                                                                         @endforeach
                                                                     @endif
@@ -139,14 +140,14 @@
                                                     <div class="layers ai-fe gapY-10">
                                                         <div class="layer">
                                                             <div
-                                                                class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
+                                                                    class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
                                                                 <div class="peer mL-10 ord-1">
                                                                     <small
-                                                                        id="msgTime{{ $discussion->Question->MessageID }}"></small>
+                                                                            id="msgTime{{ $discussion->Question->MessageID }}"></small>
                                                                 </div>
                                                                 <div class="peer-greed ord-0">
                                                                     <span
-                                                                        id="msgBody{{ $discussion->Question->MessageID }}"></span>
+                                                                            id="msgBody{{ $discussion->Question->MessageID }}"></span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -215,7 +216,7 @@
                                             <div class="peers ai-c">
                                                 <label class=" peers peer-greed js-sb ai-c">
                                                     <span
-                                                        class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
+                                                            class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
                                                     <span class="peer peer-greed">{{ $feedback->CommentText }}</span>
                                                     <span class="peer">
                                                 {{ $feedback->CommentTime->format('d M Y') }}
@@ -266,6 +267,102 @@
     <!-- EndContent -->
     </div>
     <div id="Tunis" class="tabcontent">
+        @if($response4->ReturnedTransactionCountActual === 0)
+            <br><br>
+            <div align="center" style="font-family: 'Raleway', sans-serif; font-size: 25px;"><b>Orders &
+                    Transactions</b></div>
+            <br>
+            <div align="center" style="font-family: 'Raleway', sans-serif; font-size: 20px;">No orders for this item
+                yet!
+            </div>
+            <br><br>
+        @else
+            <br><br>
+            <div class="masonry-item">
+                <div class="bd bgc-white p-20">
+                    <div class="layers">
+                        <div class="layer w-100 mB-10">
+                            <h6 class="lh-1" align="center">Orders & Transactions Table</h6>
+                        </div>
+                        <div class="layer w-100">
+                            <ul class="list-task list-group" data-role="tasklist">
+                                <div class="bgc-white bd bdrs-3 p-20 mB-20">
+                                    <div id="dataTable_wrapper" class="dataTables_wrapper">
+
+                                        <table id="dataTable" class="table table-striped table-bordered dataTable"
+                                               cellspacing="0" width="100%" role="grid"
+                                               aria-describedby="dataTable_info" style="width: 100%;">
+                                            <thead>
+                                            <tr role="row">
+                                                <th class="sorting_asc" tabindex="0" aria-controls="dataTable"
+                                                    rowspan="1" colspan="1" aria-sort="ascending"
+                                                    aria-label="Name: activate to sort column descending"
+                                                    style="width: 170px;">Buyer's userID
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Position: activate to sort column ascending"
+                                                    style="width: 252px;">Receiver's name
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Office: activate to sort column ascending"
+                                                    style="width: 125px;">Shipping address
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Age: activate to sort column ascending"
+                                                    style="width: 42px;">Receiver's phone
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1"
+                                                    aria-label="Start date: activate to sort column ascending"
+                                                    style="width: 107px;">Order's date
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Salary: activate to sort column ascending"
+                                                    style="width: 107px;">Shipping's date
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Salary: activate to sort column ascending"
+                                                    style="width: 107px;">Quantity purchased
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tfoot>
+                                            <tr>
+                                                <th rowspan="1" colspan="1">Buyer's userID</th>
+                                                <th rowspan="1" colspan="1">Receiver's name</th>
+                                                <th rowspan="1" colspan="1">Shipping address</th>
+                                                <th rowspan="1" colspan="1">Receiver's phone</th>
+                                                <th rowspan="1" colspan="1">Order's date</th>
+                                                <th rowspan="1" colspan="1">Shipping's date</th>
+                                                <th rowspan="1" colspan="1">Quantity purchased</th>
+                                            </tr>
+                                            </tfoot>
+                                            <tbody>
+                                            @foreach ($response4->TransactionArray->Transaction as $trx)
+                                                <tr role="row" class="odd">
+                                                    <td class="sorting_1">{{ $trx->Buyer->UserID }}</td>
+                                                    <td>{{ $trx->Buyer->BuyerInfo->ShippingAddress->Name }}</td>
+                                                    <td>{{ $trx->Buyer->BuyerInfo->ShippingAddress->Street1 }}
+                                                        , {{ $trx->Buyer->BuyerInfo->ShippingAddress->CityName }}
+                                                        , {{ $trx->Buyer->BuyerInfo->ShippingAddress->StateOrProvince }}
+                                                        , {{ $trx->Buyer->BuyerInfo->ShippingAddress->CountryName }}</td>
+                                                    <td>{{ $trx->Buyer->BuyerInfo->ShippingAddress->Phone }}</td>
+                                                    <td>{{ $trx->CreatedDate->format('h:m, d M Y') }}</td>
+                                                    <td>{{ $trx->ShippedTime->format('h:m, d M Y') }}</td>
+                                                    <td>{{ $trx->QuantityPurchased }}</td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+        @endif
     </div>
 @endsection
 

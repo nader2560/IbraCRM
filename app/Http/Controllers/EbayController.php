@@ -133,15 +133,18 @@ class EbayController extends Controller
         $response = $service->GetMemberMessages($request);
         $response2 = $service->GetFeedback($request2);
         $response3 = $service2->GetSingleItem($request3);
-        //$response4 = $service->GetItemTransactions($request4);
+        $response4 = $service->GetItemTransactions($request4);
 
         //dd($response4);
 
         //dd(count($response->MemberMessage->MemberMessageExchange));
 
         $msgs = array();
-        for ($i = 0; $i < count($response->MemberMessage->MemberMessageExchange); $i++) {
-            $msgs = array_merge(array($response->MemberMessage->MemberMessageExchange[$i]), $msgs);
+
+        if ($response->PaginationResult->TotalNumberOfEntries <> 0) {
+            for ($i = 0; $i < count($response->MemberMessage->MemberMessageExchange); $i++) {
+                $msgs = array_merge(array($response->MemberMessage->MemberMessageExchange[$i]), $msgs);
+            }
         }
 
         //dd($msgs);
@@ -162,7 +165,8 @@ class EbayController extends Controller
             'msgs' => $msgs,
             'response2' => $response2,
             'itemName' => $name,
-            'msgCount' => $i
+            'msgCount' => $i,
+            'response4' => $response4
         ]);
     }
 
