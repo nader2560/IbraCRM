@@ -69,6 +69,10 @@
         <a href="{{ route('ebay') }}"><b>Sales</b></a>
         <br><br>
         <h3 align="center" style="font-family: 'Raleway', sans-serif; font-size: 12px;"><u></u></h3>
+        @if ($pic <> null)
+            <img src="{{ $pic }}" alt="product's picture" width="250px">
+        @endif
+        <br>
     </div>
     <br>
     <div class="tab">
@@ -283,6 +287,10 @@
                     <div class="layers">
                         <div class="layer w-100 mB-10">
                             <h6 class="lh-1" align="center">Orders & Transactions Table</h6>
+                            <div align="center"><strong>
+                                    Item: {{ $itemName }} <br>
+                                    Total quantity sold: {{ $response4->Item->SellingStatus->QuantitySold }}
+                                </strong></div>
                         </div>
                         <div class="layer w-100">
                             <ul class="list-task list-group" data-role="tasklist">
@@ -298,31 +306,38 @@
                                                     rowspan="1" colspan="1" aria-sort="ascending"
                                                     aria-label="Name: activate to sort column descending"
                                                     style="width: 170px;">Buyer's userID
+                                                    <small>(sort)</small>
                                                 </th>
                                                 <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
                                                     colspan="1" aria-label="Position: activate to sort column ascending"
                                                     style="width: 252px;">Receiver's name
+                                                    <small>(sort)</small>
                                                 </th>
                                                 <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
                                                     colspan="1" aria-label="Office: activate to sort column ascending"
                                                     style="width: 125px;">Shipping address
+                                                    <small>(sort)</small>
                                                 </th>
                                                 <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
                                                     colspan="1" aria-label="Age: activate to sort column ascending"
                                                     style="width: 42px;">Receiver's phone
+                                                    <small>(sort)</small>
                                                 </th>
                                                 <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
                                                     colspan="1"
                                                     aria-label="Start date: activate to sort column ascending"
                                                     style="width: 107px;">Order's date
+                                                    <small>(sort)</small>
                                                 </th>
                                                 <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
                                                     colspan="1" aria-label="Salary: activate to sort column ascending"
                                                     style="width: 107px;">Shipping's date
+                                                    <small>(sort)</small>
                                                 </th>
                                                 <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
                                                     colspan="1" aria-label="Salary: activate to sort column ascending"
                                                     style="width: 107px;">Quantity purchased
+                                                    <small>(sort)</small>
                                                 </th>
                                             </tr>
                                             </thead>

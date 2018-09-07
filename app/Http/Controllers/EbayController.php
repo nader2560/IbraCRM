@@ -148,8 +148,13 @@ class EbayController extends Controller
         }
 
         //dd($msgs);
+        //dd($response3);
 
         $name = $response3->Item->Title;
+        $img=null;
+        if(isset($response3->Item->PictureURL))
+            $imgg = $response3->Item->PictureURL[0];
+        //dd($imgg);
         $i = 0;
 
         if ($response->PaginationResult->TotalNumberOfEntries <> 0) {
@@ -166,7 +171,8 @@ class EbayController extends Controller
             'response2' => $response2,
             'itemName' => $name,
             'msgCount' => $i,
-            'response4' => $response4
+            'response4' => $response4,
+            'pic' => $imgg
         ]);
     }
 
