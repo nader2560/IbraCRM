@@ -19,11 +19,13 @@
 			<div class="font-weight-light">
 				<span class="font-weight-bold">Amazon Response : <br/></span>
 				@forelse($item->amazon_feeds as $amazon_feed)
-					@forelse($amazon_feed->Message->ProcessingReport->Result as $result)
-						<strong>{{ $result->ResultCode }}</strong> : {{ $result->ResultDescription }} <br/>
-					@empty
-						No messages to show..
-					@endforelse
+					@if($amazon_feed && $amazon_feed->Message)
+						@forelse($amazon_feed->Message->ProcessingReport->Result as $result)
+							<strong>{{ $result->ResultCode }}</strong> : {{ $result->ResultDescription }} <br/>
+						@empty
+							No messages to show..
+						@endforelse
+					@endif
 					<hr/>
 				@empty
 					No feeds posted on Amazon..

@@ -435,7 +435,7 @@ class Product extends Model
 
     public function getAmazonFeedStatusAttribute(){
         $amazon_feed_ids = explode(";", $this->amazon_id);
-        //dd($amazon_feed_ids);
+
         $list_raw_feeds = [];
         foreach($amazon_feed_ids as $feed_id){
             $amz = new AmazonFeedResult("store1", $feed_id); //feed ID can be quickly set by passing it to the constructor
