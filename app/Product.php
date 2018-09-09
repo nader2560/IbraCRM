@@ -141,9 +141,136 @@ class Product extends Model
         return $amazon_feed->getResponse();
     }
 
+    public static function createGumtreePost($product_id){
+        $product = Product::findOrFail($product_id);
+
+        $string = config("gumtree.string");
+        $url= Product::getGumtreeUrl($string);
+        Product::gumtreePrepare($url,$string);
+        $checkout=Product::gumtreePostItem($url,$string);
+        Product::gumtreeCheckoutItem($checkout,$string);
+    }
+
+    private static function getGumtreeUrl($cookie){
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, "https://my.gumtree.com/postad");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Dnt: 1";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "Upgrade-Insecure-Requests: 1";
+        $headers[] = "X-Hola-Request-Id: 97040";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+        $headers[] = "Referer: https://my.gumtree.com/postad/";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 97040: before request, send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $header = curl_exec($ch);
+        $info  = curl_getinfo($ch);
+        curl_close($ch);
+        return $info["redirect_url"];
+    }
+
+    private static function gumtreePrepare($url, $cookie){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url );
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, -1);
+        $tt = new \Datetime();
+        $TITLE="TIME:".$tt->format('Y-m-d H:i:s');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '{"formErrors":{},"categoryId":"4681","locationId":"203","postcode":"TW91EL","visibleOnMap":"true","area":null,"termsAgreed":"","title":"'.$TITLE.'","description":"Plusieurs variations de Lorem Ipsum peuvent être trouvées ici ou là, mais la majeure partie dentre elles a étéaaa altérée","previousContactName":null,"contactName":"Nejmeddine","previousContactEmail":null,"contactEmail":"nejmeddine.khechine@gmail.com","contactTelephone":null,"contactUrl":null,"useEmail":"true","usePhone":"false","useUrl":false,"checkoutVariationId":null,"mainImageId":"0","imageIds":["1098961258","0"],"youtubeLink":"","websiteUrl":"http://","firstName":null,"lastName":null,"emailAddress":"nejmeddine.khechine@gmail.com","telephoneNumber":null,"password":null,"optInMarketing":true,"vrmStatus":"VRM_NONE","attributes":{"price":"11"},"features":{"URGENT":{"productName":"URGENT"},"WEBSITE_URL":{"productName":"WEBSITE_URL","selected":"false"},"FEATURED":{"productName":"FEATURE_7_DAY"},"SPOTLIGHT":{"productName":"HOMEPAGE_SPOTLIGHT"}},"removeDraft":"false","submitForm":true}');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Origin: https://my.gumtree.com";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "X-Hola-Request-Id: 77650";
+        $headers[] = "X-Requested-With: XMLHttpRequest";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Distil-Ajax: fcfxdfwcwavvtvzewaafsewarbtsfcvq";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Content-Type: application/json; charset=UTF-8";
+        $headers[] = "Accept: application/json, text/javascript, */*; q=0.01";
+        $headers[] = "Referer: https://my.gumtree.com/postad";
+        $headers[] = "Dnt: 1";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 77650: before request, send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+    }
+
+    private static function gumtreePostItem($url, $cookie){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url."/bumpup");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, -1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Origin: https://my.gumtree.com";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "X-Hola-Request-Id: 77650";
+        $headers[] = "X-Requested-With: XMLHttpRequest";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Distil-Ajax: fcfxdfwcwavvtvzewaafsewarbtsfcvq";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Content-Type: application/json; charset=UTF-8";
+        $headers[] = "Accept: application/json, text/javascript, */*; q=0.01";
+        $headers[] = "Referer: https://my.gumtree.com/postad";
+        //$headers[] = "Dnt: 1";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 77650: before request, send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        $info  = curl_getinfo($ch);
+        curl_close ($ch);
+        return  $info['redirect_url'];
+    }
+
+    private static function gumtreeCheckoutItem($url, $cookie){
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Dnt: 1";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "Upgrade-Insecure-Requests: 1";
+        $headers[] = "X-Hola-Request-Id: 172411";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+        $headers[] = "Referer: https://my.gumtree.com/postad/";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 172411: before request, send headers, headers received, status: HTTP/1.1 303 See Other, before request ".$url.", send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        curl_close ($ch);
+    }
+
+
     /**
-     * @param $request : contains the inputs' values (array)
-     * @param $post_id : the product's id (used to make the post GUID)
+     * @param $product_id : the product's id (used to make the post GUID)
      * @return mixed : id of the wp post
      */
 
