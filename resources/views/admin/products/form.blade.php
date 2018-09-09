@@ -11,7 +11,7 @@
 
 			{!! Form::myInput('price', 'price', 'Price') !!}
 
-			{!! Form::myFile('image_path', 'Image Path') !!}
+			{!! Form::myFiles('image_path', 'Image Paths') !!}
 
 		</div>  
 	</div>

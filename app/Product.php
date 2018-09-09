@@ -55,10 +55,20 @@ class Product extends Model
         $commun = [
             'title'    => "required",
             'price'    => "required|numeric|max:99999",
-            'image_path'  => "required|image"
+            'image_path'  => "required",
+            'image_path.*' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ];
 
         return $commun;
+    }
+
+    /*
+    |------------------------------------------------------------------------------------
+    | Relationship
+    |------------------------------------------------------------------------------------
+    */
+    public function uploads(){
+        return $this->hasMany('App\Upload', 'product_id');
     }
 
     /*
@@ -412,13 +422,19 @@ class Product extends Model
             return 'http://placehold.it/400x400';
         }
 
-        return config('variables.product_picture.public').$value;
+        return $value;
     }
 
-    public function setImagePathAttribute($photo)
+    public function setImagePathAttribute($photos)
     {
-        $this->attributes['image_path'] = move_file($photo, 'product_picture');
-        $this->setThumbnailPathAttribute($photo);
+        foreach($photos as $photo){
+            $upload = new Upload();
+            $upload->product_id = $this->id;
+            $upload->image_path = $photo;
+            $upload->save();
+        }
+        $this->attributes['image_path'] = $upload->image_path;
+        $this->setThumbnailPathAttribute($upload->thumbnail_path);
     }
 
     public function getThumbnailPathAttribute($value)
@@ -426,11 +442,11 @@ class Product extends Model
         if (!$value) {
             return 'http://placehold.it/160x160';
         }
-        return config('variables.product_thumbnail.public').$value;
+        return $value;
     }
-    public function setThumbnailPathAttribute($photo)
+    public function setThumbnailPathAttribute($thumbnail_path)
     {
-        $this->attributes['thumbnail_path'] = move_file($photo, 'product_thumbnail');
+        $this->attributes['thumbnail_path'] = $thumbnail_path;
     }
 
     public function getAmazonFeedStatusAttribute(){
