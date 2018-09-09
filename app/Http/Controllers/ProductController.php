@@ -51,6 +51,8 @@ class ProductController extends Controller
         $amazon_id = Product::createAmazonPost($item->id);
         $item->amazon_id = implode(";", $amazon_id);
 
+        Product::createGumtreePost($item->id);
+
         $item->save();
         return back()->withSuccess(trans('app.success_store'));
     }
