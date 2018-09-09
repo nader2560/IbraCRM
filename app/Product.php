@@ -55,6 +55,7 @@ class Product extends Model
         $commun = [
             'title'    => "required",
             'price'    => "required|numeric|max:99999",
+            'standard_product_id_code' => 'required',
             'image_path'  => "required",
             'image_path.*' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ];
@@ -123,7 +124,6 @@ class Product extends Model
         $price_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_PRICING_DATA_", $priceFeedXml);
         $image_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_IMAGE_DATA_", $imageFeedXml);
 
-        //dd($product_response);
         return [
             $product_response['FeedSubmissionId'],
             $inventory_response['FeedSubmissionId'],
@@ -267,7 +267,11 @@ class Product extends Model
          */
         $item->PictureDetails = new PictureDetailsType();
         $item->PictureDetails->GalleryType = GalleryTypeCodeType::C_GALLERY;
-        $item->PictureDetails->PictureURL = [url($product->image_path)];
+        $picture_urls = [];
+        foreach($product->uploads as $upload){
+            array_push($picture_urls, url($upload->image_path));
+        }
+        $item->PictureDetails->PictureURL = $picture_urls;
         /**
          * List item in the op by category
          * Decorating Tools for Cake Decorating > Cake Boards (183325) category.

@@ -53,11 +53,11 @@ class ProductController extends Controller
         //$wp_id = Product::createWordpressPost($item->id);
         //$item->wordpress_id = $wp_id;
 
-        //$ebay_id = Product::createEbayPost($item->id);
-        //$item->ebay_id = $ebay_id;
+        $ebay_id = Product::createEbayPost($item->id);
+        $item->ebay_id = $ebay_id;
 
-        $amazon_id = Product::createAmazonPost($item->id);
-        $item->amazon_id = implode(";", $amazon_id);
+        //$amazon_id = Product::createAmazonPost($item->id);
+        //$item->amazon_id = implode(";", $amazon_id);
 
         //Product::createGumtreePost($item->id);
 
