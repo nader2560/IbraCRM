@@ -34,7 +34,7 @@ use Sonnenglas\AmazonMws\AmazonFeedResult;
 
 class Product extends Model
 {
-    const standard_product_id_types = [0 => "UPC", 1 => "EAN", 2 => "ISBN"];
+    const standard_product_id_types = ["0" => "UPC", "1" => "EAN", "2" => "ISBN"];
 
     /**
      * The attributes that are mass assignable.
@@ -55,10 +55,21 @@ class Product extends Model
         $commun = [
             'title'    => "required",
             'price'    => "required|numeric|max:99999",
-            'image_path'  => "required|image"
+            'standard_product_id_code' => 'required',
+            'image_path'  => "required",
+            'image_path.*' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ];
 
         return $commun;
+    }
+
+    /*
+    |------------------------------------------------------------------------------------
+    | Relationship
+    |------------------------------------------------------------------------------------
+    */
+    public function uploads(){
+        return $this->hasMany('App\Upload', 'product_id');
     }
 
     /*
@@ -73,7 +84,7 @@ class Product extends Model
         // Product Feed
         $productFeedXml = simplexml_load_file(public_path("amazon-xml/product.xml"));
         $productFeedXml->Message->Product->SKU = $product->sku;
-        $productFeedXml->Message->Product->StandardProductID->Type = Product::standard_product_id_types[$product->standard_product_id_type];
+        $productFeedXml->Message->Product->StandardProductID->Type = Product::standard_product_id_types[(int) $product->standard_product_id_type];
         $productFeedXml->Message->Product->StandardProductID->Value = $product->standard_product_id_code;
         $productFeedXml->Message->Product->LaunchDate = $product->created_at->addDay()->toIso8601ZuluString();
         $productFeedXml->Message->Product->DescriptionData->Title = $product->title;
@@ -87,9 +98,25 @@ class Product extends Model
         $priceFeedXml->Message->Price->StandardPrice = $product->price;
         // Image Feed
         $imageFeedXml = simplexml_load_file(public_path("amazon-xml/image.xml"));
-        $imageFeedXml->Message->ProductImage->SKU = $product->sku;
-        $imageFeedXml->Message->ProductImage->ImageLocation = $product->image_path;
+        // Making the Image Feed a bit better :)
+        $i=0;
+        foreach($product->uploads as $upload){
+            if($i == 0)
+                $image_type = "Main";
+            else
+                $image_type = "PT".strval($i+1);
 
+            $imageFeedXml->addChild("Message");
+            $lastMessage = $imageFeedXml->Message[$i];
+            $lastMessage->addChild("MessageID",$i+1);
+            $lastMessage->addChild("OperationType", 'Update');
+            $lastMessage->addChild("ProductImage");
+            $productImage = $lastMessage->ProductImage;
+            $productImage->addChild("SKU",$product->sku);
+            $productImage->addChild("ImageType",$image_type);
+            $productImage->addChild("ImageLocation",url($upload->image_path));
+            $i++;
+        }
 
         // Getting the response for each one of the feeds
         $product_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_DATA_", $productFeedXml);
@@ -97,7 +124,6 @@ class Product extends Model
         $price_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_PRICING_DATA_", $priceFeedXml);
         $image_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_IMAGE_DATA_", $imageFeedXml);
 
-        //dd($product_response);
         return [
             $product_response['FeedSubmissionId'],
             $inventory_response['FeedSubmissionId'],
@@ -241,7 +267,11 @@ class Product extends Model
          */
         $item->PictureDetails = new PictureDetailsType();
         $item->PictureDetails->GalleryType = GalleryTypeCodeType::C_GALLERY;
-        $item->PictureDetails->PictureURL = [url($product->image_path)];
+        $picture_urls = [];
+        foreach($product->uploads as $upload){
+            array_push($picture_urls, url($upload->image_path));
+        }
+        $item->PictureDetails->PictureURL = $picture_urls;
         /**
          * List item in the op by category
          * Decorating Tools for Cake Decorating > Cake Boards (183325) category.
@@ -412,13 +442,19 @@ class Product extends Model
             return 'http://placehold.it/400x400';
         }
 
-        return config('variables.product_picture.public').$value;
+        return $value;
     }
 
-    public function setImagePathAttribute($photo)
+    public function setImagePathAttribute($photos)
     {
-        $this->attributes['image_path'] = move_file($photo, 'product_picture');
-        $this->setThumbnailPathAttribute($photo);
+        foreach($photos as $photo){
+            $upload = new Upload();
+            $upload->product_id = $this->id;
+            $upload->image_path = $photo;
+            $upload->save();
+        }
+        $this->attributes['image_path'] = $upload->image_path;
+        $this->setThumbnailPathAttribute($upload->thumbnail_path);
     }
 
     public function getThumbnailPathAttribute($value)
@@ -426,16 +462,16 @@ class Product extends Model
         if (!$value) {
             return 'http://placehold.it/160x160';
         }
-        return config('variables.product_thumbnail.public').$value;
+        return $value;
     }
-    public function setThumbnailPathAttribute($photo)
+    public function setThumbnailPathAttribute($thumbnail_path)
     {
-        $this->attributes['thumbnail_path'] = move_file($photo, 'product_thumbnail');
+        $this->attributes['thumbnail_path'] = $thumbnail_path;
     }
 
     public function getAmazonFeedStatusAttribute(){
         $amazon_feed_ids = explode(";", $this->amazon_id);
-        //dd($amazon_feed_ids);
+
         $list_raw_feeds = [];
         foreach($amazon_feed_ids as $feed_id){
             $amz = new AmazonFeedResult("store1", $feed_id); //feed ID can be quickly set by passing it to the constructor
