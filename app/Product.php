@@ -156,7 +156,6 @@ class Product extends Model
 
     private static function gumtreePrepare($url, $cookie){
         $ch = curl_init();
-        echo getUrl()."\n";
         curl_setopt($ch, CURLOPT_URL, $url );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, -1);
@@ -188,7 +187,6 @@ class Product extends Model
 
     private static function gumtreePostItem($url, $cookie){
         $ch = curl_init();
-        echo $url."\n";
         curl_setopt($ch, CURLOPT_URL, $url."/bumpup");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, -1);
