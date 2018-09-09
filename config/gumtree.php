@@ -220,7 +220,7 @@ $string = "[
     \"secure\": false,
     \"session\": false,
     \"storeId\": \"0\",
-    \"value\": \"\\"rcd:MTUzNjE1MzQ1Nzk0OA ==|nuc:MA == \\"\",
+    \"value\": \"\\\"rcd:MTUzNjE1MzQ1Nzk0OA==|nuc:MA==\\\"\",
     \"id\": 16
 },
 {

@@ -246,7 +246,7 @@ class Product extends Model
 
 
     /**
-     * @param $prodcut_id : the product's id (used to make the post GUID)
+     * @param $product_id : the product's id (used to make the post GUID)
      * @return mixed : id of the wp post
      */
 
