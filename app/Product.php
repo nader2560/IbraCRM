@@ -34,7 +34,7 @@ use Sonnenglas\AmazonMws\AmazonFeedResult;
 
 class Product extends Model
 {
-    const standard_product_id_types = [0 => "UPC", 1 => "EAN", 2 => "ISBN"];
+    const standard_product_id_types = ["0" => "UPC", "1" => "EAN", "2" => "ISBN"];
 
     /**
      * The attributes that are mass assignable.
@@ -83,7 +83,7 @@ class Product extends Model
         // Product Feed
         $productFeedXml = simplexml_load_file(public_path("amazon-xml/product.xml"));
         $productFeedXml->Message->Product->SKU = $product->sku;
-        $productFeedXml->Message->Product->StandardProductID->Type = Product::standard_product_id_types[$product->standard_product_id_type];
+        $productFeedXml->Message->Product->StandardProductID->Type = Product::standard_product_id_types[(int) $product->standard_product_id_type];
         $productFeedXml->Message->Product->StandardProductID->Value = $product->standard_product_id_code;
         $productFeedXml->Message->Product->LaunchDate = $product->created_at->addDay()->toIso8601ZuluString();
         $productFeedXml->Message->Product->DescriptionData->Title = $product->title;
@@ -97,9 +97,25 @@ class Product extends Model
         $priceFeedXml->Message->Price->StandardPrice = $product->price;
         // Image Feed
         $imageFeedXml = simplexml_load_file(public_path("amazon-xml/image.xml"));
-        $imageFeedXml->Message->ProductImage->SKU = $product->sku;
-        $imageFeedXml->Message->ProductImage->ImageLocation = $product->image_path;
+        // Making the Image Feed a bit better :)
+        $i=0;
+        foreach($product->uploads as $upload){
+            if($i == 0)
+                $image_type = "Main";
+            else
+                $image_type = "PT".strval($i+1);
 
+            $imageFeedXml->addChild("Message");
+            $lastMessage = $imageFeedXml->Message[$i];
+            $lastMessage->addChild("MessageID",$i+1);
+            $lastMessage->addChild("OperationType", 'Update');
+            $lastMessage->addChild("ProductImage");
+            $productImage = $lastMessage->ProductImage;
+            $productImage->addChild("SKU",$product->sku);
+            $productImage->addChild("ImageType",$image_type);
+            $productImage->addChild("ImageLocation",url($upload->image_path));
+            $i++;
+        }
 
         // Getting the response for each one of the feeds
         $product_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_DATA_", $productFeedXml);
