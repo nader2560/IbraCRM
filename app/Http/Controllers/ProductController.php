@@ -40,7 +40,15 @@ class ProductController extends Controller
     {
         $this->validate($request, Product::rules());
 
-        $item = Product::create($request->all());
+        $item = new Product();
+        $item->title = $request->get("title");
+        $item->price = $request->get("price");
+        $item->description = $request->get("description");
+        $item->save();
+        $item->image_path = $request->image_path;
+        $item->save();
+
+
 
         $wp_id = Product::createWordpressPost($item->id);
         $item->wordpress_id = $wp_id;
@@ -54,6 +62,7 @@ class ProductController extends Controller
         Product::createGumtreePost($item->id);
 
         $item->save();
+
         return back()->withSuccess(trans('app.success_store'));
     }
 

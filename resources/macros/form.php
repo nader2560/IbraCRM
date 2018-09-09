@@ -64,3 +64,13 @@ Form::macro('myRange', function($name, $start, $end, $selected='', $options=[])
         </div>
     ";
 });
+
+Form::macro('myFiles', function($name, $label, $options=[])
+{
+    return "
+        <div class='form-group'>
+            ". $label .
+            " <input name=". $name ."[] id=". $name ." type=\"file\" multiple=\"\" />
+        </div>
+    ";
+});
