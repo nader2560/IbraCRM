@@ -24,6 +24,9 @@ Route::prefix('feedback')->group(function(){
     Route::get('amz','AmazonController@index')->name('amazon');
     Route::get('fbm','FacebookController@index')->name('facebook');
     Route::get('gmt','GumtreeController@index')->name('gumtree');
+    Route::get('gmt/product/{id}','GumtreeController@product');
+    Route::get('gmt/msg/{id}','GumtreeController@getThread');
+    Route::get('gmt/msgsend','GumtreeController@sendMsg');
     Route::get('gpl','GooglePlusController@index')->name('google');
 });
 
@@ -32,6 +35,9 @@ Route::get('/test',function(){
 });
 Route::get('/test2',function(){
     return view('admin.feedback.test2');
+});
+Route::get('/test3',function(){
+    return view('admin.feedback.gumtree_parse');
 });
 Route::get('/test4',function(){
     return view('admin.feedback.test4');

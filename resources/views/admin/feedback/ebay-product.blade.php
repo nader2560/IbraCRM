@@ -465,7 +465,7 @@
 
                             $.ajax({
                                 type: "POST",
-                                url: '../fbmsg',
+                                url: '../msgsend',
                                 data: {
                                     'body': document.getElementById("fbTxt{{ $feedback->FeedbackID }}").value,
                                     'msgId': "{{ $feedback->FeedbackID }}",

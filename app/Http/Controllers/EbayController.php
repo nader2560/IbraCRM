@@ -54,6 +54,7 @@ class EbayController extends Controller
 
         $response1 = $service->getAccount($request1);
         $response2 = $service->getMyeBaySelling($request2);
+        //dd($response2);
 
 //        $idArrays = array();
 //        foreach($response2->ActiveList->ItemArray->Item as $item){
