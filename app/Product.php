@@ -29,9 +29,12 @@ use Hkonnet\LaravelEbay\Facade\Ebay;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Image;
+use Sonnenglas\AmazonMws\AmazonFeed;
+use Sonnenglas\AmazonMws\AmazonFeedResult;
 
 class Product extends Model
 {
+    const standard_product_id_types = ["0" => "UPC", "1" => "EAN", "2" => "ISBN"];
 
     /**
      * The attributes that are mass assignable.
@@ -39,7 +42,7 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'description', 'price', 'image_path', 'thumbnail_path'
+        'title', 'description', 'standard_product_id_type', 'standard_product_id_code', 'price', 'image_path', 'thumbnail_path'
     ];
 
     /*
@@ -52,10 +55,21 @@ class Product extends Model
         $commun = [
             'title'    => "required",
             'price'    => "required|numeric|max:99999",
-            'image_path'  => "required|image",
+            'standard_product_id_code' => 'required',
+            'image_path'  => "required",
+            'image_path.*' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ];
 
         return $commun;
+    }
+
+    /*
+    |------------------------------------------------------------------------------------
+    | Relationship
+    |------------------------------------------------------------------------------------
+    */
+    public function uploads(){
+        return $this->hasMany('App\Upload', 'product_id');
     }
 
     /*
@@ -64,9 +78,199 @@ class Product extends Model
     |------------------------------------------------------------------------------------
     */
 
+    public static function createAmazonPost($product_id) {
+        $product = Product::findOrFail($product_id);
+
+        // Product Feed
+        $productFeedXml = simplexml_load_file(public_path("amazon-xml/product.xml"));
+        $productFeedXml->Message->Product->SKU = $product->sku;
+        $productFeedXml->Message->Product->StandardProductID->Type = Product::standard_product_id_types[(int) $product->standard_product_id_type];
+        $productFeedXml->Message->Product->StandardProductID->Value = $product->standard_product_id_code;
+        $productFeedXml->Message->Product->LaunchDate = $product->created_at->addDay()->toIso8601ZuluString();
+        $productFeedXml->Message->Product->DescriptionData->Title = $product->title;
+        $productFeedXml->Message->Product->DescriptionData->Description = $product->description;
+        // Inventory Feed
+        $inventoryFeedXml = simplexml_load_file(public_path("amazon-xml/inventory.xml"));
+        $inventoryFeedXml->Message->Inventory->SKU = $product->sku;
+        // Price Feed
+        $priceFeedXml = simplexml_load_file(public_path("amazon-xml/price.xml"));
+        $priceFeedXml->Message->Price->SKU = $product->sku;
+        $priceFeedXml->Message->Price->StandardPrice = $product->price;
+        // Image Feed
+        $imageFeedXml = simplexml_load_file(public_path("amazon-xml/image.xml"));
+        // Making the Image Feed a bit better :)
+        $i=0;
+        foreach($product->uploads as $upload){
+            if($i == 0)
+                $image_type = "Main";
+            else
+                $image_type = "PT".strval($i+1);
+
+            $imageFeedXml->addChild("Message");
+            $lastMessage = $imageFeedXml->Message[$i];
+            $lastMessage->addChild("MessageID",$i+1);
+            $lastMessage->addChild("OperationType", 'Update');
+            $lastMessage->addChild("ProductImage");
+            $productImage = $lastMessage->ProductImage;
+            $productImage->addChild("SKU",$product->sku);
+            $productImage->addChild("ImageType",$image_type);
+            $productImage->addChild("ImageLocation",url($upload->image_path));
+            $i++;
+        }
+
+        // Getting the response for each one of the feeds
+        $product_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_DATA_", $productFeedXml);
+        $inventory_response = Product::submitAmazonFeed("store1", "_POST_INVENTORY_AVAILABILITY_DATA_", $inventoryFeedXml);
+        $price_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_PRICING_DATA_", $priceFeedXml);
+        $image_response = Product::submitAmazonFeed("store1", "_POST_PRODUCT_IMAGE_DATA_", $imageFeedXml);
+
+        return [
+            $product_response['FeedSubmissionId'],
+            $inventory_response['FeedSubmissionId'],
+            $price_response['FeedSubmissionId'],
+            $image_response['FeedSubmissionId']
+        ];
+    }
+
+    private static function submitAmazonFeed ($store, $feed_type, $xml){
+        $amazon_feed = new AmazonFeed($store);
+        $amazon_feed->setFeedType($feed_type);
+        $amazon_feed->setFeedContent($xml->asXML());
+        $amazon_feed->submitFeed();
+
+        return $amazon_feed->getResponse();
+    }
+
+    public static function createGumtreePost($product_id){
+        $product = Product::findOrFail($product_id);
+
+        $string = config("gumtree.string");
+        $url= Product::getGumtreeUrl($string);
+        Product::gumtreePrepare($url,$string);
+        $checkout=Product::gumtreePostItem($url,$string);
+        Product::gumtreeCheckoutItem($checkout,$string);
+    }
+
+    private static function getGumtreeUrl($cookie){
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, "https://my.gumtree.com/postad");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Dnt: 1";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "Upgrade-Insecure-Requests: 1";
+        $headers[] = "X-Hola-Request-Id: 97040";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+        $headers[] = "Referer: https://my.gumtree.com/postad/";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 97040: before request, send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $header = curl_exec($ch);
+        $info  = curl_getinfo($ch);
+        curl_close($ch);
+        return $info["redirect_url"];
+    }
+
+    private static function gumtreePrepare($url, $cookie){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url );
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, -1);
+        $tt = new \Datetime();
+        $TITLE="TIME:".$tt->format('Y-m-d H:i:s');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '{"formErrors":{},"categoryId":"4681","locationId":"203","postcode":"TW91EL","visibleOnMap":"true","area":null,"termsAgreed":"","title":"'.$TITLE.'","description":"Plusieurs variations de Lorem Ipsum peuvent être trouvées ici ou là, mais la majeure partie dentre elles a étéaaa altérée","previousContactName":null,"contactName":"Nejmeddine","previousContactEmail":null,"contactEmail":"nejmeddine.khechine@gmail.com","contactTelephone":null,"contactUrl":null,"useEmail":"true","usePhone":"false","useUrl":false,"checkoutVariationId":null,"mainImageId":"0","imageIds":["1098961258","0"],"youtubeLink":"","websiteUrl":"http://","firstName":null,"lastName":null,"emailAddress":"nejmeddine.khechine@gmail.com","telephoneNumber":null,"password":null,"optInMarketing":true,"vrmStatus":"VRM_NONE","attributes":{"price":"11"},"features":{"URGENT":{"productName":"URGENT"},"WEBSITE_URL":{"productName":"WEBSITE_URL","selected":"false"},"FEATURED":{"productName":"FEATURE_7_DAY"},"SPOTLIGHT":{"productName":"HOMEPAGE_SPOTLIGHT"}},"removeDraft":"false","submitForm":true}');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Origin: https://my.gumtree.com";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "X-Hola-Request-Id: 77650";
+        $headers[] = "X-Requested-With: XMLHttpRequest";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Distil-Ajax: fcfxdfwcwavvtvzewaafsewarbtsfcvq";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Content-Type: application/json; charset=UTF-8";
+        $headers[] = "Accept: application/json, text/javascript, */*; q=0.01";
+        $headers[] = "Referer: https://my.gumtree.com/postad";
+        $headers[] = "Dnt: 1";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 77650: before request, send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+    }
+
+    private static function gumtreePostItem($url, $cookie){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url."/bumpup");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, -1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Origin: https://my.gumtree.com";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "X-Hola-Request-Id: 77650";
+        $headers[] = "X-Requested-With: XMLHttpRequest";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Distil-Ajax: fcfxdfwcwavvtvzewaafsewarbtsfcvq";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Content-Type: application/json; charset=UTF-8";
+        $headers[] = "Accept: application/json, text/javascript, */*; q=0.01";
+        $headers[] = "Referer: https://my.gumtree.com/postad";
+        //$headers[] = "Dnt: 1";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 77650: before request, send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        $info  = curl_getinfo($ch);
+        curl_close ($ch);
+        return  $info['redirect_url'];
+    }
+
+    private static function gumtreeCheckoutItem($url, $cookie){
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Dnt: 1";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
+        $headers[] = "Upgrade-Insecure-Requests: 1";
+        $headers[] = "X-Hola-Request-Id: 172411";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36";
+        $headers[] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+        $headers[] = "Referer: https://my.gumtree.com/postad/";
+        $headers[] = $cookie;
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Hola-Unblocker-Bext: reqid 172411: before request, send headers, headers received, status: HTTP/1.1 303 See Other, before request ".$url.", send headers";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        curl_close ($ch);
+    }
+
+
     /**
-     * @param $request : contains the inputs' values (array)
-     * @param $post_id : the product's id (used to make the post GUID)
+     * @param $product_id : the product's id (used to make the post GUID)
      * @return mixed : id of the wp post
      */
 
@@ -177,7 +381,7 @@ class Product extends Model
          */
         $item->Title = $product->title;
         $item->Description = $product->description;
-        $item->SKU = 'ABC-001'; // todo
+        $item->SKU = $product->sku;
         $item->Country = env("EBAY_COUNTRY_CODE");
         $item->Location = env("EBAY_LOCATION");
         $item->PostalCode = env("EBAY_POSTAL_CODE");
@@ -190,7 +394,11 @@ class Product extends Model
          */
         $item->PictureDetails = new PictureDetailsType();
         $item->PictureDetails->GalleryType = GalleryTypeCodeType::C_GALLERY;
-        $item->PictureDetails->PictureURL = [url($product->image_path)];
+        $picture_urls = [];
+        foreach($product->uploads as $upload){
+            array_push($picture_urls, url($upload->image_path));
+        }
+        $item->PictureDetails->PictureURL = $picture_urls;
         /**
          * List item in the op by category
          * Decorating Tools for Cake Decorating > Cake Boards (183325) category.
@@ -211,7 +419,6 @@ class Product extends Model
          * This is because a seller may have more than one PayPal account.
          */
         $item->PaymentMethods = [
-            'VisaMC',
             'PayPal'
         ];
         $item->PayPalEmailAddress = env("EBAY_PAYPAL_ADDRESS");
@@ -314,60 +521,7 @@ class Product extends Model
                 }
             }
         }
-        if ($response->Ack !== 'Failure') {
-            dd($response);
-            /*printf(
-                "The item was listed to the eBay Sandbox with the Item number %s\n",
-                $response->ItemID
-            );*/
-        }
-        dd("The End");
-
-        // *********************** OLD CODE ***********************
-        // Create the request object.
-        $request = new CreateOrReplaceInventoryItemRestRequest();
-
-        // $request->sku = '123'; // SKU goes for (Stock-Keeping Unit)
-
-        $request->availability = new Availability();
-        $request->availability->shipToLocationAvailability = new ShipToLocationAvailability();
-        $request->availability->shipToLocationAvailability->quantity = 50; // todo have a default quantity as env variable ?
-
-        $request->condition = ConditionEnum::C_NEW_OTHER;
-
-        $request->product = new \DTS\eBaySDK\Inventory\Types\Product(); // Ebay's product
-        $request->product->title = $product->title;
-        $request->product->description = $product->description;
-        /*
-         * $request->product->aspects = [
-                'Brand'                => ['GoPro'],
-                'Type'                 => ['Helmet/Action'],
-                'Storage Type'         => ['Removable'],
-                'Recording Definition' => ['High Definition'],
-                'Media Format'         => ['Flash Drive (SSD)'],
-                'Optical Zoom'         => ['10x', '8x', '4x']
-            ];
-            Aspects are specified as an associative array.
-         */
-        $request->product->imageUrls = [
-            $product->image_path
-        ];
-
-        // Send the request
-        $response = $service->createOrReplaceInventoryItem($request);
-        if (isset($response->errors)) {
-            foreach ($response->errors as $error) {
-                Log::error(
-                    "%s: %s\n%s\n\n",
-                    $error->errorId,
-                    $error->message,
-                    $error->longMessage
-                );
-            }
-        }
-        if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 400) {
-            dd($response);
-        }
+        return $response->ItemID;
     }
 
 
@@ -398,19 +552,36 @@ class Product extends Model
         return $this->price;
     }
 
+    public function getSkuAttribute(){
+        $words = explode(" ", $this->title);
+        $acronym = "";
+
+        foreach ($words as $w) {
+            $acronym .= $w[0];
+        }
+
+        return $acronym . '-' . $this->id;
+    }
+
     public function getImagePathAttribute($value)
     {
         if (!$value) {
             return 'http://placehold.it/400x400';
         }
 
-        return config('variables.product_picture.public').$value;
+        return $value;
     }
 
-    public function setImagePathAttribute($photo)
+    public function setImagePathAttribute($photos)
     {
-        $this->attributes['image_path'] = move_file($photo, 'product_picture');
-        $this->setThumbnailPathAttribute($photo);
+        foreach($photos as $photo){
+            $upload = new Upload();
+            $upload->product_id = $this->id;
+            $upload->image_path = $photo;
+            $upload->save();
+        }
+        $this->attributes['image_path'] = $upload->image_path;
+        $this->setThumbnailPathAttribute($upload->thumbnail_path);
     }
 
     public function getThumbnailPathAttribute($value)
@@ -418,10 +589,23 @@ class Product extends Model
         if (!$value) {
             return 'http://placehold.it/160x160';
         }
-        return config('variables.product_thumbnail.public').$value;
+        return $value;
     }
-    public function setThumbnailPathAttribute($photo)
+    public function setThumbnailPathAttribute($thumbnail_path)
     {
-        $this->attributes['thumbnail_path'] = move_file($photo, 'product_thumbnail');
+        $this->attributes['thumbnail_path'] = $thumbnail_path;
+    }
+
+    public function getAmazonFeedStatusAttribute(){
+        $amazon_feed_ids = explode(";", $this->amazon_id);
+
+        $list_raw_feeds = [];
+        foreach($amazon_feed_ids as $feed_id){
+            $amz = new AmazonFeedResult("store1", $feed_id); //feed ID can be quickly set by passing it to the constructor
+            //$amz->setFeedId($feed_id); //otherwise, it must be set this way
+            $amz->fetchFeedResult();
+            $list_raw_feeds += [$amz->getRawFeed()];
+        }
+        return $list_raw_feeds;
     }
 }

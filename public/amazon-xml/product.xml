@@ -1,0 +1,46 @@
+<?xml version="1.0" ?> 
+	<AmazonEnvelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="amzn-envelope.xsd">
+		<Header>
+			<DocumentVersion>1.01</DocumentVersion> 
+			<MerchantIdentifier>A1F83G8C2ARO7P</MerchantIdentifier> 
+		</Header>
+		<MessageType>Product</MessageType> 
+		<PurgeAndReplace>true</PurgeAndReplace> 
+		<Message>
+			<MessageID>1</MessageID> 
+			<OperationType>Update</OperationType> 
+			<Product>
+				<SKU></SKU> 
+				<StandardProductID>
+					<Type></Type>
+					<Value></Value>
+				</StandardProductID>
+				<LaunchDate></LaunchDate> 
+				<DescriptionData>
+					<Title></Title> 
+					<Brand>IA Cakes</Brand>
+					<Description></Description> 
+					<Manufacturer>IA Cakes</Manufacturer> 
+					<SearchTerms>cake boards</SearchTerms> 
+					<SearchTerms>cake sponges</SearchTerms> 
+					<SearchTerms>cake mixtures</SearchTerms> 
+					<SearchTerms>cake decoration</SearchTerms> 
+					<SearchTerms>cake ingredients</SearchTerms> 
+					<IsGiftWrapAvailable>false</IsGiftWrapAvailable> 
+					<IsGiftMessageAvailable>false</IsGiftMessageAvailable>
+					<RecommendedBrowseNode>340834031</RecommendedBrowseNode>
+					<RecommendedBrowseNode>358587031</RecommendedBrowseNode>
+				</DescriptionData>
+				<ProductData>
+					<FoodAndBeverages>
+						<ProductType>
+							<Food>
+								<CountryOfOrigin>GB</CountryOfOrigin>
+								<NumberOfItems>1</NumberOfItems>
+							</Food>
+						</ProductType>
+					</FoodAndBeverages>
+				</ProductData>
+			</Product>
+		</Message>
+	</AmazonEnvelope>

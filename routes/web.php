@@ -9,11 +9,12 @@ Auth::routes();
 |------------------------------------------------------------------------------------
 */
 
-Route::get('/', 'DashboardController@index')->name('dash');
+Route::group(['middleware' => 'auth'], function() {
+    Route::get('/', 'DashboardController@index')->name('dash');
 
-Route::resource('users', 'UserController');
+    Route::resource('users', 'UserController');
 
-Route::resource('products', 'ProductController');
+    Route::resource('products', 'ProductController');
 
 Route::prefix('feedback')->group(function(){
     Route::get('/','FeedBackController')->name('feed');
@@ -30,8 +31,15 @@ Route::prefix('feedback')->group(function(){
     Route::get('gpl','GooglePlusController@index')->name('google');
 });
 
-Route::get('/test',function(){
-    return view('admin.feedback.test');
+    Route::get('/test',function(){
+        return view('admin.feedback.test');
+    });
+    Route::get('/test2',function(){
+        return view('admin.feedback.test2');
+    });
+    Route::get('/test4',function(){
+        return view('admin.feedback.test4');
+    });
 });
 Route::get('/test2',function(){
     return view('admin.feedback.test2');
@@ -43,7 +51,4 @@ Route::get('/test4',function(){
     return view('admin.feedback.test4');
 });
 
-Route::get('/home', function () {
-    return view('home');
-});
 

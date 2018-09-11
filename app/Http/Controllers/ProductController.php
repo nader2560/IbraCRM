@@ -40,11 +40,27 @@ class ProductController extends Controller
     {
         $this->validate($request, Product::rules());
 
-        $item = Product::create($request->all());
+        $item = new Product();
+        $item->title = $request->get("title");
+        $item->price = $request->get("price");
+        $item->description = $request->get("description");
+        $item->save();
+        $item->image_path = $request->image_path;
+        $item->save();
+
+
 
         $wp_id = Product::createWordpressPost($item->id);
-        //Product::createEbayPost($item->id); todo : final tests and have the ebay id
         $item->wordpress_id = $wp_id;
+
+        $ebay_id = Product::createEbayPost($item->id);
+        $item->ebay_id = $ebay_id;
+
+        $amazon_id = Product::createAmazonPost($item->id);
+        $item->amazon_id = implode(";", $amazon_id);
+
+        Product::createGumtreePost($item->id);
+
         $item->save();
 
         return back()->withSuccess(trans('app.success_store'));
@@ -59,7 +75,12 @@ class ProductController extends Controller
     public function show($id)
     {
         $item = Product::findOrFail($id);
-
+        $list_feeds = [];
+        foreach($item->amazon_feed_status as $amz_feed){
+            $xml = simplexml_load_string($amz_feed);
+            $list_feeds += [$xml];
+        }
+        $item->amazon_feeds = $list_feeds;
         return view('admin.products.view', compact('item'));
     }
 
