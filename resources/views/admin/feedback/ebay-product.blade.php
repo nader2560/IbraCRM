@@ -69,6 +69,10 @@
         <a href="{{ route('ebay') }}"><b>Sales</b></a>
         <br><br>
         <h3 align="center" style="font-family: 'Raleway', sans-serif; font-size: 12px;"><u></u></h3>
+        @if ($pic <> null)
+            <img src="{{ $pic }}" alt="product's picture" width="250px">
+        @endif
+        <br>
     </div>
     <br>
     <div class="tab">
@@ -80,6 +84,7 @@
             @endif
         </button>
         <button class="tablinks" onclick="openCity(event, 'Paris')">Feedback & Comments</button>
+        <button class="tablinks" onclick="openCity(event, 'Tunis')">Orders & Transactions</button>
     </div>
     <div id="London" class="tabcontent">
         <!-- Messages Content -->
@@ -94,7 +99,7 @@
         @else
             <div align="center">
                 <div class="masonry-item">
-                @foreach($response->MemberMessage->MemberMessageExchange as $discussion)
+                @foreach($msgs as $discussion)
                     <!-- #Chat ==================== -->
                         <div class="bd bgc-white">
                             <div class="layers">
@@ -110,12 +115,22 @@
                                             <div class="peer peer-greed">
                                                 <div class="layers ai-fs gapY-5">
                                                     <div class="layer">
-                                                        <div class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
+                                                        <div
+                                                                class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
                                                             <div class="peer mR-10">
                                                                 <small>{{ $discussion->CreationDate->format('H:i') }}</small>
                                                             </div>
                                                             <div class="peer-greed">
-                                                                <span>{{ $discussion->Question->Body }}</span>
+                                                                <span>{{ $discussion->Question->Body }}
+                                                                    @if (isset($discussion->MessageMedia))
+                                                                        <br><br>
+                                                                        @foreach($discussion->MessageMedia as $media)
+                                                                            <img src="{{ $media->MediaURL }}"
+                                                                                 alt="{{ $media->MediaName }}">
+                                                                            <br>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -128,12 +143,15 @@
                                                 <div class="peer peer-greed ord-0">
                                                     <div class="layers ai-fe gapY-10">
                                                         <div class="layer">
-                                                            <div class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
+                                                            <div
+                                                                    class="peers fxw-nw ai-c pY-3 pX-10 bgc-white bdrs-2 lh-3/2">
                                                                 <div class="peer mL-10 ord-1">
-                                                                    <small id="msgTime{{ $discussion->Question->MessageID }}"></small>
+                                                                    <small
+                                                                            id="msgTime{{ $discussion->Question->MessageID }}"></small>
                                                                 </div>
                                                                 <div class="peer-greed ord-0">
-                                                                    <span id="msgBody{{ $discussion->Question->MessageID }}"></span>
+                                                                    <span
+                                                                            id="msgBody{{ $discussion->Question->MessageID }}"></span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -201,7 +219,8 @@
                                         <li class="list-group-item bdw-0" data-role="task">
                                             <div class="peers ai-c">
                                                 <label class=" peers peer-greed js-sb ai-c">
-                                                    <span class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
+                                                    <span
+                                                            class="peer peer-greed">User: {{ $feedback->CommentingUser }}</span>
                                                     <span class="peer peer-greed">{{ $feedback->CommentText }}</span>
                                                     <span class="peer">
                                                 {{ $feedback->CommentTime->format('d M Y') }}
@@ -251,11 +270,120 @@
     @endif
     <!-- EndContent -->
     </div>
+    <div id="Tunis" class="tabcontent">
+        @if($response4->ReturnedTransactionCountActual === 0)
+            <br><br>
+            <div align="center" style="font-family: 'Raleway', sans-serif; font-size: 25px;"><b>Orders &
+                    Transactions</b></div>
+            <br>
+            <div align="center" style="font-family: 'Raleway', sans-serif; font-size: 20px;">No orders for this item
+                yet!
+            </div>
+            <br><br>
+        @else
+            <br><br>
+            <div class="masonry-item">
+                <div class="bd bgc-white p-20">
+                    <div class="layers">
+                        <div class="layer w-100 mB-10">
+                            <h6 class="lh-1" align="center">Orders & Transactions Table</h6>
+                            <div align="center"><strong>
+                                    Item: {{ $itemName }} <br>
+                                    Total quantity sold: {{ $response4->Item->SellingStatus->QuantitySold }}
+                                </strong></div>
+                        </div>
+                        <div class="layer w-100">
+                            <ul class="list-task list-group" data-role="tasklist">
+                                <div class="bgc-white bd bdrs-3 p-20 mB-20">
+                                    <div id="dataTable_wrapper" class="dataTables_wrapper">
+
+                                        <table id="dataTable" class="table table-striped table-bordered dataTable"
+                                               cellspacing="0" width="100%" role="grid"
+                                               aria-describedby="dataTable_info" style="width: 100%;">
+                                            <thead>
+                                            <tr role="row">
+                                                <th class="sorting_asc" tabindex="0" aria-controls="dataTable"
+                                                    rowspan="1" colspan="1" aria-sort="ascending"
+                                                    aria-label="Name: activate to sort column descending"
+                                                    style="width: 170px;">Buyer's userID
+                                                    <small>(sort)</small>
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Position: activate to sort column ascending"
+                                                    style="width: 252px;">Receiver's name
+                                                    <small>(sort)</small>
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Office: activate to sort column ascending"
+                                                    style="width: 125px;">Shipping address
+                                                    <small>(sort)</small>
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Age: activate to sort column ascending"
+                                                    style="width: 42px;">Receiver's phone
+                                                    <small>(sort)</small>
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1"
+                                                    aria-label="Start date: activate to sort column ascending"
+                                                    style="width: 107px;">Order's date
+                                                    <small>(sort)</small>
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Salary: activate to sort column ascending"
+                                                    style="width: 107px;">Shipping's date
+                                                    <small>(sort)</small>
+                                                </th>
+                                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
+                                                    colspan="1" aria-label="Salary: activate to sort column ascending"
+                                                    style="width: 107px;">Quantity purchased
+                                                    <small>(sort)</small>
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tfoot>
+                                            <tr>
+                                                <th rowspan="1" colspan="1">Buyer's userID</th>
+                                                <th rowspan="1" colspan="1">Receiver's name</th>
+                                                <th rowspan="1" colspan="1">Shipping address</th>
+                                                <th rowspan="1" colspan="1">Receiver's phone</th>
+                                                <th rowspan="1" colspan="1">Order's date</th>
+                                                <th rowspan="1" colspan="1">Shipping's date</th>
+                                                <th rowspan="1" colspan="1">Quantity purchased</th>
+                                            </tr>
+                                            </tfoot>
+                                            <tbody>
+                                            @foreach ($response4->TransactionArray->Transaction as $trx)
+                                                <tr role="row" class="odd">
+                                                    <td class="sorting_1">{{ $trx->Buyer->UserID }}</td>
+                                                    <td>{{ $trx->Buyer->BuyerInfo->ShippingAddress->Name }}</td>
+                                                    <td>{{ $trx->Buyer->BuyerInfo->ShippingAddress->Street1 }}
+                                                        , {{ $trx->Buyer->BuyerInfo->ShippingAddress->CityName }}
+                                                        , {{ $trx->Buyer->BuyerInfo->ShippingAddress->StateOrProvince }}
+                                                        , {{ $trx->Buyer->BuyerInfo->ShippingAddress->CountryName }}</td>
+                                                    <td>{{ $trx->Buyer->BuyerInfo->ShippingAddress->Phone }}</td>
+                                                    <td>{{ $trx->CreatedDate->format('h:m, d M Y') }}</td>
+                                                    <td>{{ $trx->ShippedTime->format('h:m, d M Y') }}</td>
+                                                    <td>{{ $trx->QuantityPurchased }}</td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+        @endif
+    </div>
 @endsection
 
 @section('js')
     @if($response->PaginationResult->TotalNumberOfEntries <> 0)
-        @foreach($response->MemberMessage->MemberMessageExchange as $discussion)
+        @foreach($msgs as $discussion)
             @if($discussion->MessageStatus <> "Answered")
                 <script>
                     document.getElementById("msgBtn{{ $discussion->Question->MessageID }}").onclick = function () {
@@ -337,7 +465,7 @@
 
                             $.ajax({
                                 type: "POST",
-                                url: '../fbmsg',
+                                url: '../msgsend',
                                 data: {
                                     'body': document.getElementById("fbTxt{{ $feedback->FeedbackID }}").value,
                                     'msgId': "{{ $feedback->FeedbackID }}",

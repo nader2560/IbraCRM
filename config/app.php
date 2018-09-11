@@ -164,6 +164,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         Hkonnet\LaravelEbay\EbayServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
+        Sonnenglas\AmazonMws\ServiceProvider::class,
 
     ],
 

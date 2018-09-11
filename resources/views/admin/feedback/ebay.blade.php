@@ -48,11 +48,16 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {{--@php($i = 0)--}}
+                                @php($i = 0)
                                 @foreach($response2->ActiveList->ItemArray->Item as $item)
                                     <tr>
-                                        <td class="fw-600"><a href="./eby/product/{{ $item->ItemID }}">{{ $item->Title }} {{-- $msgsCount[$i] --}}</a></td>
-                                        {{--@php($i++)--}}
+                                        <td class="fw-600"><a
+                                                href="./eby/product/{{ $item->ItemID }}">{{ $item->Title }}
+                                                @if ($msgsCount[$i] > 0)
+                                                    <strong style="font-size: 18px">({{ $msgsCount[$i] }})</strong>
+                                                @endif
+                                            </a></td>
+                                        @php($i++)
                                         <td>
                                             {{--<span class="badge bgc-red-50 c-red-700 p-10 lh-0 tt-c badge-pill">{{ substr($item->TimeLeft,1,strlen($item->TimeLeft)-1) }}</span>--}}
                                             <span class="badge bgc-green-50 c-green-700 p-10 lh-0 tt-c badge-pill">
@@ -61,7 +66,8 @@
                                         </td>
                                         <td>{{ $item->ListingDetails->StartTime->format('d M Y') }}</td>
                                         <td>
-                                            <span class="text-success">{{ $item->SellingStatus->CurrentPrice->value }} {{ $item->SellingStatus->CurrentPrice->currencyID }}</span>
+                                            <span
+                                                class="text-success">{{ $item->SellingStatus->CurrentPrice->value }} {{ $item->SellingStatus->CurrentPrice->currencyID }}</span>
                                         </td>
                                     </tr>
                                 @endforeach

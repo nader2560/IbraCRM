@@ -30,7 +30,7 @@
             </div>
             <div class="slide"><a href="{{ route('gumtree') }}"><img class="imgc" src="{{asset('images/gumtree_logo.png')}}"
                                                               alt="gumtree's logo"></a></div>
-            <div class="slide"><a href="{{ route('google') }}"><img width="90px" src="{{asset('images/gplus_logo.png')}}"
+            <div class="slide"><a href="{{ route('google') }}"><img width="90px" src="{{asset('images/icing_logo.png')}}"
                                                                alt="google+'s logo"></a>
             </div>
         </section>

@@ -1,6 +1,6 @@
 @extends('admin.default')
-
-@section('content')
+@if(auth()->user() != null)
+    @section('content')
 
     <div class="row gap-20 masonry pos-r">
         <div class="masonry-sizer col-md-6"></div>
@@ -90,22 +90,22 @@
                         <div class="peers ai-c jc-c gapX-20">
                             <div class="peer">
                                 <span class="fsz-def fw-600 mR-10 c-grey-800">10% <i
-                                            class="fa fa-level-up c-green-500"></i></span>
+                                        class="fa fa-level-up c-green-500"></i></span>
                                 <small class="c-grey-500 fw-600">APPL</small>
                             </div>
                             <div class="peer fw-600">
                                 <span class="fsz-def fw-600 mR-10 c-grey-800">2% <i
-                                            class="fa fa-level-down c-red-500"></i></span>
+                                        class="fa fa-level-down c-red-500"></i></span>
                                 <small class="c-grey-500 fw-600">Average</small>
                             </div>
                             <div class="peer fw-600">
                                 <span class="fsz-def fw-600 mR-10 c-grey-800">15% <i
-                                            class="fa fa-level-up c-green-500"></i></span>
+                                        class="fa fa-level-up c-green-500"></i></span>
                                 <small class="c-grey-500 fw-600">Sales</small>
                             </div>
                             <div class="peer fw-600">
                                 <span class="fsz-def fw-600 mR-10 c-grey-800">8% <i
-                                            class="fa fa-level-down c-red-500"></i></span>
+                                        class="fa fa-level-down c-red-500"></i></span>
                                 <small class="c-grey-500 fw-600">Profit</small>
                             </div>
                         </div>
@@ -160,7 +160,8 @@
                                     <label for="inputCall4" class=" peers peer-greed js-sb ai-c">
                                         <span class="peer peer-greed">Give Purchase Report</span>
                                         <span class="peer">
-                                            <span class="badge badge-pill fl-r badge-warning lh-0 p-10">not important</span>
+                                            <span
+                                                class="badge badge-pill fl-r badge-warning lh-0 p-10">not important</span>
                                         </span>
                                     </label>
                                 </div>
@@ -194,3 +195,6 @@
         </div>
     </div>
 @endsection
+@else
+    <h1>You're not connected</h1>
+@endif
