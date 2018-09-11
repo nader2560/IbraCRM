@@ -145,7 +145,7 @@ class GumtreeController extends Controller
         return $json;
     }
 
-    public function sendMsg(Request $request)
+    public function send1Msg(Request $request)
     {
         $cookiefile = "./cookies-1.txt";
         $string = file_get_contents($cookiefile);
@@ -158,7 +158,7 @@ class GumtreeController extends Controller
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://my.gumtree.com/conversations/" . $request->input('id') . "/ message");
         curl_setopt($ch, CURLOPT_TIMEOUT, -1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, '{ad_id: '.$request->input('ad_id').', message: "'.$request->input('message').'", sender_email: "i_anwar_22@yahoo.co.uk"}');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '{ad_id: ' . $request->input('ad_id') . ', message: "' . $request->input('message') . '", sender_email: "i_anwar_22@yahoo.co.uk"}');
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_REFERER, 0);
         $headers = array();
@@ -167,18 +167,56 @@ class GumtreeController extends Controller
         $headers[] = "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7";
         $headers[] = "X-Hola-Request-Id: 77650";
         $headers[] = "X-Requested-With: XMLHttpRequest";
-        $headers[] = $string;
+        $headers[] = $string. " eCG_eh=ec=Conversation:ea=MessageSendAttempt:el=null:pt=Conversation:url=https://my.gumtree.com/manage/messages?conversationId=" . $request->input('id') . ":cc=1:lc=10000392:aid=1312162491:";
         $headers[] = "Connection: keep-alive";
         $headers[] = "X-Distil-Ajax: fcfxdfwcwavvtvzewaafsewarbtsfcvq";
         $headers[] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/68.0.3440.106 Chrome/68.0.3440.106 Safari/537.36";
         $headers[] = "Content-Type: application/json; charset=UTF-8";
         $headers[] = "Accept: */*";
-        $headers[] = "Referer: https://my.gumtree.com/manage/messages";
+        $headers[] = "Referer: https://my.gumtree.com/manage/messages?conversationId=" . $request->input('id');
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $result = curl_exec($ch);
         $map = json_decode($result);
         return new Response($map, 200);
+    }
+
+    public function sendMsg(Request $request)
+    {
+        $cookiefile = "./cookies-1.txt";
+        $string = file_get_contents($cookiefile);
+        $json_a = json_decode($string, true);
+        $string = "Cookie: ";
+        for ($i = 0; $i < count($json_a); $i++) {
+            $string .= $json_a[$i]['name'] . '=' . $json_a[$i]['value'] . "; ";
+        }
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, "https://my.gumtree.com/conversations/". $request->input('id') . "/message");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '{ad_id:  '. $request->input('ad_id') .' , message: "'. $request->input('message') .'" , sender_email: "i_anwar_22@yahoo.co.uk"}');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+
+        $headers = array();
+        $headers[] = "Origin: https://my.gumtree.com";
+        $headers[] = "Accept-Encoding: gzip, deflate, br";
+        $headers[] = "Accept-Language: en-US,en;q=0.9";
+        $headers[] = "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/68.0.3440.106 Chrome/68.0.3440.106 Safari/537.36";
+        $headers[] = "Content-Type: application/x-www-form-urlencoded";
+        $headers[] = "Accept: */*";
+        $headers[] = "Referer: https://my.gumtree.com/manage/messages?conversationId=". $request->input('id');
+        $headers[] = $string . " eCG_eh=ec=Conversation:ea=MessageSendAttempt:el=null:pt=Conversation:url=https://my.gumtree.com/manage/messages?conversationId=" . $request->input('id') . ":aid=" . $request->input('ad_id') . ":";
+        $headers[] = "Connection: keep-alive";
+        $headers[] = "X-Distil-Ajax: fcfxdfwcwavvtvzewaafsewarbtsfcvq";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
     }
 
     public function index()
