@@ -202,7 +202,6 @@
     <script>
         function clickedbtn(id,infos) {
             if (document.getElementById('input' + id).value != "") {
-                console.log("hey");
                 var now = new Date();
                 document.getElementById('dd' + id).innerHTML += "<div class=\"peers fxw-nw ai-fe\">\n" +
                     "                    <div class=\"peer peer-greed ord-0\">\n" +

@@ -27,7 +27,7 @@ Route::prefix('feedback')->group(function(){
     Route::get('gmt','GumtreeController@index')->name('gumtree');
     Route::get('gmt/product/{id}','GumtreeController@product');
     Route::get('gmt/msg/{id}','GumtreeController@getThread');
-    Route::get('gmt/msgsend','GumtreeController@sendMsg');
+    Route::post('gmt/msgsend','GumtreeController@sendMsg');
     Route::get('gpl','GooglePlusController@index')->name('google');
 });
 
