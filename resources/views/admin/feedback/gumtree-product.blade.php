@@ -171,6 +171,8 @@
             if (document.getElementById('div' + id).innerHTML === "") {
                 thrdView(id);
                 document.getElementById('div' + id).innerHTML = document.getElementById('div' + id).innerHTML + '<button onclick="closeThread(\'' + id + '\')">Close</button>';
+            } else {
+                closeThread(id);
             }
         }
 

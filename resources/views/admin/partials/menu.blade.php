@@ -30,3 +30,11 @@
         <span class="title">Feedback</span>
     </a>
 </li>
+<li class="nav-item">
+    <a class='sidebar-link' href="{{ route('cartgen') }}">
+        <span class="icon-holder">
+            <i class="c-brown-500 ti-credit-card"></i>
+        </span>
+        <span class="title">Generate Cart</span>
+    </a>
+</li>

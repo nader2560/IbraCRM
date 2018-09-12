@@ -15,6 +15,7 @@
         "laravel/framework": "5.6.*",
         "laravel/tinker": "^1.0",
         "laravelcollective/html": "^5.6",
+        "pixelpeter/laravel5-woocommerce-api-client": "^3.0",
         "sonnenglas/laravel5-amazon-mws": "^3.0"
     },
     "require-dev": {

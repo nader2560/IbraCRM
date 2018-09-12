@@ -51,4 +51,5 @@ Route::get('/test4',function(){
     return view('admin.feedback.test4');
 });
 
+Route::get('/cartgen','WPCartController@index')->name('cartgen');
 
