@@ -29,6 +29,7 @@ use Hkonnet\LaravelEbay\Facade\Ebay;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Image;
+use Pixelpeter\Woocommerce\Facades\Woocommerce;
 use Sonnenglas\AmazonMws\AmazonFeed;
 use Sonnenglas\AmazonMws\AmazonFeedResult;
 
@@ -42,7 +43,7 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'title', 'description', 'standard_product_id_type', 'standard_product_id_code', 'price', 'image_path', 'thumbnail_path'
+        'title', 'description', 'standard_product_category','standard_product_id_type', 'standard_product_id_code', 'price', 'image_path', 'thumbnail_path'
     ];
 
     /*
@@ -56,6 +57,7 @@ class Product extends Model
             'title'    => "required",
             'price'    => "required|numeric|max:99999",
             'standard_product_id_code' => 'required',
+            'standard_product_category' => 'required',
             'image_path'  => "required",
             'image_path.*' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ];
@@ -187,7 +189,7 @@ class Product extends Model
         curl_setopt($ch, CURLOPT_TIMEOUT, -1);
         $tt = new \Datetime();
         $TITLE="TIME:".$tt->format('Y-m-d H:i:s');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, '{"formErrors":{},"categoryId":"4681","locationId":"203","postcode":"TW91EL","visibleOnMap":"true","area":null,"termsAgreed":"","title":"'.$TITLE.'","description":"Plusieurs variations de Lorem Ipsum peuvent être trouvées ici ou là, mais la majeure partie dentre elles a étéaaa altérée","previousContactName":null,"contactName":"Nejmeddine","previousContactEmail":null,"contactEmail":"nejmeddine.khechine@gmail.com","contactTelephone":null,"contactUrl":null,"useEmail":"true","usePhone":"false","useUrl":false,"checkoutVariationId":null,"mainImageId":"0","imageIds":["1098961258","0"],"youtubeLink":"","websiteUrl":"http://","firstName":null,"lastName":null,"emailAddress":"nejmeddine.khechine@gmail.com","telephoneNumber":null,"password":null,"optInMarketing":true,"vrmStatus":"VRM_NONE","attributes":{"price":"11"},"features":{"URGENT":{"productName":"URGENT"},"WEBSITE_URL":{"productName":"WEBSITE_URL","selected":"false"},"FEATURED":{"productName":"FEATURE_7_DAY"},"SPOTLIGHT":{"productName":"HOMEPAGE_SPOTLIGHT"}},"removeDraft":"false","submitForm":true}');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '{"formErrors":{},"categoryId":"4681","locationId":"203","postcode":"TW91EL","visibleOnMap":"true","area":null,"termsAgreed":"","title":"'.$TITLE.'","description":"Plusieurs variations de Lorem Ipsum peuvent \EAtre trouv\E9es ici ou l\E0, mais la majeure partie dentre elles a \E9t\E9aaa alt\E9r\E9e","previousContactName":null,"contactName":"Nejmeddine","previousContactEmail":null,"contactEmail":"nejmeddine.khechine@gmail.com","contactTelephone":null,"contactUrl":null,"useEmail":"true","usePhone":"false","useUrl":false,"checkoutVariationId":null,"mainImageId":"0","imageIds":["1098961258","0"],"youtubeLink":"","websiteUrl":"http://","firstName":null,"lastName":null,"emailAddress":"nejmeddine.khechine@gmail.com","telephoneNumber":null,"password":null,"optInMarketing":true,"vrmStatus":"VRM_NONE","attributes":{"price":"11"},"features":{"URGENT":{"productName":"URGENT"},"WEBSITE_URL":{"productName":"WEBSITE_URL","selected":"false"},"FEATURED":{"productName":"FEATURE_7_DAY"},"SPOTLIGHT":{"productName":"HOMEPAGE_SPOTLIGHT"}},"removeDraft":"false","submitForm":true}');
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
@@ -319,11 +321,35 @@ class Product extends Model
             "to_ping" => "",
             "pinged" => "",
             "post_content_filtered" => "",
+            "post_type"=>"product",
 
         );
 
-        $post = Post::create($postData);
+        //$post = Post::create($postData);
 
+
+        $images = [];
+        $position =0;
+        foreach($product->uploads as $upload){
+            array_push($images, array(
+                'src'=> url($upload->image_path),
+                'position'=>$position));
+            $position++;
+        }
+        $data = [
+            'name' =>  $product->title,
+            'type' => 'simple',
+            'regular_price' => $product->price,
+            'description' => $product->description,
+            'categories' => [
+                [
+                    'id' => $product->category,
+                ]
+            ],
+            'images' => $images
+        ];
+        dd($data);
+        $post = Woocommerce::post('products',$data);
         return $post->id;
     }
 
@@ -344,8 +370,8 @@ class Product extends Model
         /**
          * An user token is required when using the Trading service.
          */
-         $request->RequesterCredentials = new CustomSecurityHeaderType();
-         $request->RequesterCredentials->eBayAuthToken = Ebay::getAuthToken();
+        $request->RequesterCredentials = new CustomSecurityHeaderType();
+        $request->RequesterCredentials->eBayAuthToken = Ebay::getAuthToken();
 
         /**
          * Begin creating the fixed price item.
@@ -404,7 +430,7 @@ class Product extends Model
          * Decorating Tools for Cake Decorating > Cake Boards (183325) category.
          */
         $item->PrimaryCategory = new CategoryType();
-        $item->PrimaryCategory->CategoryID = env("EBAY_CATEGORY_ID", "183325");
+        $item->PrimaryCategory->CategoryID = Product::categoryTranslator( $product->category, 1 );
         /**
          * Tell buyers what condition the item is in.
          * For the category that we are listing in the value of 1000 is for Brand New.
@@ -524,7 +550,43 @@ class Product extends Model
         return $response->ItemID;
     }
 
+    public static function categoryTranslator($categoryId, $framework){
+        if($framework == 1){
 
+            switch ($categoryId){
+                case 335 :
+                    return 183324;
+                    break;
+                case 336 :
+                    return 177009;
+                    break;
+                case 337 :
+                    return 177013;
+                    break;
+                case 338 :
+                    return 38174;
+                    break;
+                case 339 :
+                    return 183339;
+                    break;
+                case 340 :
+                    return 183346;
+                    break;
+                case 341 :
+                    return 177009;
+                    break;
+                case 342 :
+                    return 183324;
+                    break;
+                case 343 :
+                    return 14308;
+                    break;
+            }
+        }
+
+
+
+    }
     /*
     |------------------------------------------------------------------------------------
     | Attributes

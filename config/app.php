@@ -146,6 +146,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
+        Pixelpeter\Woocommerce\WoocommerceServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -217,6 +218,7 @@ return [
         'Ebay' => Hkonnet\LaravelEbay\Facade\Ebay::class,
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
+        'Woocommerce' => Pixelpeter\Woocommerce\Facades\Woocommerce::class,
 
     ],
 

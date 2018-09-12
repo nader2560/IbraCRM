@@ -16,6 +16,8 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::resource('products', 'ProductController');
 
+Route::get('/cartgen','WPCartController@index')->name('cartgen');
+
 Route::prefix('feedback')->group(function(){
     Route::get('/','FeedBackController')->name('feed');
     Route::get('eby','EbayController@index')->name('ebay');
@@ -51,5 +53,4 @@ Route::get('/test4',function(){
     return view('admin.feedback.test4');
 });
 
-Route::get('/cartgen','WPCartController@index')->name('cartgen');
 
